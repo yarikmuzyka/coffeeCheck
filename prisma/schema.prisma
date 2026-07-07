@@ -1,14 +1,18 @@
 // coffeeCheck — Coffee Tracker / Brew Journal
-// SQLite для локального MVP. Легко мігрується на PostgreSQL:
-// достатньо змінити provider та DATABASE_URL.
+// PostgreSQL (Neon/Supabase/Vercel Postgres) для деплою на Vercel.
+//   DATABASE_URL — пулований конект (runtime у serverless)
+//   DIRECT_URL   — прямий конект (для `prisma db push` / migrate)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // native — для локалі; rhel-openssl-3.0.x — для рантайму Vercel (Amazon Linux)
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Roaster {
