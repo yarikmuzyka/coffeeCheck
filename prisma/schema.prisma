@@ -1,0 +1,88 @@
+// coffeeCheck — Coffee Tracker / Brew Journal
+// SQLite для локального MVP. Легко мігрується на PostgreSQL:
+// достатньо змінити provider та DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Roaster {
+  id        String   @id @default(cuid())
+  name      String
+  country   String?
+  city      String?
+  website   String?
+  instagram String?
+  notes     String?
+  coffees   Coffee[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coffee {
+  id            String    @id @default(cuid())
+  name          String
+  roasterId     String
+  roaster       Roaster   @relation(fields: [roasterId], references: [id], onDelete: Cascade)
+  originCountry String?
+  region        String?
+  farm          String?
+  producer      String?
+  variety       String?
+  process       String?
+  roastLevel    String?
+  roastDate     DateTime?
+  purchaseDate  DateTime?
+  price         Float?
+  weightGrams   Int?
+  pricePer100g  Float?
+  declaredNotes String?
+  userNotes     String?
+  productUrl    String?
+  imageUrl      String?
+  isFinished    Boolean   @default(false)
+  wouldBuyAgain Boolean?
+  brewLogs      BrewLog[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model BrewLog {
+  id              String   @id @default(cuid())
+  coffeeId        String
+  coffee          Coffee   @relation(fields: [coffeeId], references: [id], onDelete: Cascade)
+  brewedAt        DateTime @default(now())
+  method          String
+  recipeName      String?
+  doseGrams       Float?
+  waterGrams      Float?
+  ratio           String?
+  grindSize       String?
+  grinder         String?
+  waterName       String?
+  waterTempC      Float?
+  brewTimeSeconds Int?
+  filterType      String?
+  brewer          String?
+
+  // Rating
+  overallScore    Int?
+  aromaScore      Int?
+  acidityScore    Int?
+  sweetnessScore  Int?
+  bodyScore       Int?
+  aftertasteScore Int?
+  balanceScore    Int?
+  perceivedNotes  String?
+  defects         String?
+  notes           String?
+  wouldBrewAgain  Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
