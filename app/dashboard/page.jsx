@@ -4,6 +4,17 @@ import { pluralizeUk, formatWeightGrams } from '../../lib/format.js'
 
 export const dynamic = 'force-dynamic'
 
+function SummaryStat({ label, count, weightGrams, spent }) {
+  return (
+    <div className="stat">
+      <div className="label">{label}</div>
+      <div className="value">
+        {count} {pluralizeUk(count, ['пачка', 'пачки', 'пачок'])} / {formatWeightGrams(weightGrams)} / {spent} <small>₴</small>
+      </div>
+    </div>
+  )
+}
+
 function TopList({ title, items }) {
   return (
     <div className="card">
@@ -40,12 +51,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="stat-grid">
-        <div className="stat">
-          <div className="label">Всього</div>
-          <div className="value">
-            {s.totalCoffees} {pluralizeUk(s.totalCoffees, ['пачка', 'пачки', 'пачок'])} / {formatWeightGrams(s.totalWeightGrams)} / {s.totalSpent} <small>₴</small>
-          </div>
-        </div>
+        <SummaryStat label="Всього" count={s.totalCoffees} weightGrams={s.totalWeightGrams} spent={s.totalSpent} />
+        <SummaryStat label="Цей місяць" count={s.monthCoffees} weightGrams={s.monthWeightGrams} spent={s.monthSpent} />
       </div>
 
       <div className="cols" style={{ marginTop: 12 }}>
