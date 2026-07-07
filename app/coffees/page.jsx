@@ -118,6 +118,7 @@ export default async function CoffeesPage({ searchParams }) {
                 <p className="meta">
                   {[c.roaster?.name, c.originCountry, c.variety, c.process]
                     .filter(Boolean).join(' · ')}
+                  {c.scaScore != null ? ` · SCA ${c.scaScore}` : ''}
                   {c.price ? ` · ${c.price} ₴` : ''}
                 </p>
               </div>

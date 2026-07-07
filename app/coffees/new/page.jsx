@@ -76,6 +76,11 @@ export default async function NewCoffeePage() {
           </div>
         </div>
 
+        <div className="field" style={{ maxWidth: 200 }}>
+          <label>Оцінка SCA</label>
+          <input type="number" step="0.25" min="0" max="100" name="scaScore" placeholder="86.5" />
+        </div>
+
         <div style={{ display: 'flex', gap: 10 }}>
           <button className="btn btn--primary" type="submit">Зберегти каву</button>
           <Link href="/coffees" className="btn btn--ghost">Скасувати</Link>

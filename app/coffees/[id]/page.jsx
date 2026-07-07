@@ -26,6 +26,7 @@ export default async function CoffeeDetailPage({ params }) {
     ['Регіон', coffee.region],
     ['Сорт', coffee.variety],
     ['Обробка', coffee.process],
+    ['Оцінка SCA', coffee.scaScore != null ? coffee.scaScore : null],
     ['Дата купівлі', fmtDate(coffee.purchaseDate)],
     ['Ціна', coffee.price != null ? `${coffee.price} ₴` : null],
   ].filter(([, v]) => v)
