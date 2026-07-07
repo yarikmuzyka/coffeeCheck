@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '../../../lib/prisma.js'
 import { coffeeAvgScore } from '../../../lib/stats.js'
@@ -39,6 +40,7 @@ export default async function CoffeeDetailPage({ params }) {
           <p className="sub">{coffee.roaster?.name}</p>
         </div>
         <div className="spacer" />
+        <Link href={`/coffees/${coffee.id}/edit`} className="btn btn--secondary btn--sm">Редагувати</Link>
         <div className="score-pill" style={{ fontSize: '2rem' }}>
           {avg != null ? avg.toFixed(1) : '—'}<br /><small>сер. оцінка /10</small>
         </div>
