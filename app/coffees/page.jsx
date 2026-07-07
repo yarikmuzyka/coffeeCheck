@@ -118,12 +118,18 @@ export default async function CoffeesPage({ searchParams }) {
                 <p className="meta">
                   {[c.roaster?.name, c.originCountry, c.variety, c.process]
                     .filter(Boolean).join(' · ')}
-                  {c.scaScore != null ? ` · SCA ${c.scaScore}` : ''}
                   {c.price ? ` · ${c.price} ₴` : ''}
                 </p>
               </div>
-              <div className="score-pill">
-                {score != null ? score.toFixed(1) : '—'}<br /><small>/10</small>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {c.scaScore != null && (
+                  <div className="score-pill score-pill--sca">
+                    {c.scaScore}<br /><small>SCA</small>
+                  </div>
+                )}
+                <div className="score-pill">
+                  {score != null ? score.toFixed(1) : '—'}<br /><small>/10</small>
+                </div>
               </div>
             </Link>
           ))}
