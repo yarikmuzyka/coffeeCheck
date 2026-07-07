@@ -10,7 +10,7 @@ function buildRecommendations(coffees, s) {
 
   // Обсмажчик стабільно 8+
   for (const g of s.topRoasters) {
-    if (g.avg >= 8 && g.count >= 2) {
+    if (g.avg != null && g.avg >= 8 && g.count >= 2) {
       recs.push({ type: 'good', text: `Обсмажчик «${g.key}» стабільно тримає ${g.avg.toFixed(1)}/10 (${g.count} кав) — бери сміливо.` })
     }
   }
@@ -30,7 +30,7 @@ function buildRecommendations(coffees, s) {
     recs.push({ type: 'good', text: `Тобі заходить ${comboRanked[0].k} (${comboRanked[0].avg.toFixed(1)}/10) — шукай схожі лоти.` })
   }
   // Обробка з низькими оцінками
-  const weakProcess = [...s.topProcesses].reverse().find((g) => g.avg < 6 && g.count >= 2)
+  const weakProcess = [...s.topProcesses].reverse().find((g) => g.avg != null && g.avg < 6 && g.count >= 2)
   if (weakProcess) {
     recs.push({ type: 'warn', text: `Обробка «${weakProcess.key}» дає в середньому лише ${weakProcess.avg.toFixed(1)}/10 — можливо, це не твоє.` })
   }
@@ -48,7 +48,7 @@ function FullTop({ title, items, unit = '/10' }) {
           {items.map((g) => (
             <li key={g.key}>
               <span className="k">{g.key}<span className="cnt">×{g.count}</span></span>
-              <span className="v">{g.avg.toFixed(1)}{unit}</span>
+              <span className="v">{g.avg != null ? g.avg.toFixed(1) : '—'}{g.avg != null ? unit : ''}</span>
             </li>
           ))}
         </ul>

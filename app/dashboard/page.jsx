@@ -16,7 +16,7 @@ function TopList({ title, items }) {
               <span className="k">
                 {g.key}<span className="cnt">×{g.count}</span>
               </span>
-              <span className="v">{g.avg.toFixed(1)}</span>
+              <span className="v">{g.avg != null ? g.avg.toFixed(1) : '—'}</span>
             </li>
           ))}
         </ul>
