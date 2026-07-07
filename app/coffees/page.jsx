@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
-import { coffeeAvgScore } from '../../lib/stats.js'
+import { coffeeScore } from '../../lib/stats.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ export default async function CoffeesPage({ searchParams }) {
   const sort = sp.sort ?? 'date'
 
   const [allCoffees, roasters, processes] = await Promise.all([
-    prisma.coffee.findMany({ include: { roaster: true, brewLogs: true } }),
+    prisma.coffee.findMany({ include: { roaster: true } }),
     prisma.roaster.findMany({ orderBy: { name: 'asc' } }),
     prisma.process.findMany({ orderBy: { name: 'asc' } }),
   ])
@@ -35,7 +35,7 @@ export default async function CoffeesPage({ searchParams }) {
     return true
   })
 
-  const withScore = list.map((c) => ({ c, score: coffeeAvgScore(c) }))
+  const withScore = list.map((c) => ({ c, score: coffeeScore(c) }))
   withScore.sort((a, b) => {
     if (sort === 'rating') return (b.score ?? -1) - (a.score ?? -1)
     if (sort === 'price') return (b.c.price ?? 0) - (a.c.price ?? 0)

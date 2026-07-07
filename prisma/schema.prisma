@@ -44,6 +44,7 @@ model Coffee {
   variety       String?
   process       String?
   scaScore      Float?
+  myScore       Float?
   purchaseDate  DateTime?
   price         Float?
   isFinished    Boolean   @default(false)

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
-import { computeDashboard, coffeeAvgScore } from '../../lib/stats.js'
+import { computeDashboard, coffeeScore } from '../../lib/stats.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +17,7 @@ function buildRecommendations(coffees, s) {
   // Найкраща зв'язка країна+обробка
   const combo = new Map()
   for (const c of coffees) {
-    const score = coffeeAvgScore(c)
+    const score = coffeeScore(c)
     if (score == null || !c.originCountry || !c.process) continue
     const key = `${c.process} ${c.originCountry}`
     if (!combo.has(key)) combo.set(key, [])
@@ -59,7 +59,7 @@ function FullTop({ title, items, unit = '/10' }) {
 
 export default async function AnalyticsPage() {
   const coffees = await prisma.coffee.findMany({
-    include: { roaster: true, brewLogs: true },
+    include: { roaster: true },
   })
   const s = computeDashboard(coffees)
   const recs = buildRecommendations(coffees, s)
@@ -74,7 +74,7 @@ export default async function AnalyticsPage() {
       <h2>Рекомендації</h2>
       {recs.length === 0 ? (
         <div className="card"><p className="empty" style={{ padding: '12px 0' }}>
-          Додай більше оцінених заварювань, щоб зʼявились рекомендації.
+          Додай більше кав зі своєю оцінкою, щоб зʼявились рекомендації.
         </p></div>
       ) : (
         <div className="card">

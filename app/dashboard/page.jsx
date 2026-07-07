@@ -27,7 +27,7 @@ function TopList({ title, items }) {
 
 export default async function DashboardPage() {
   const coffees = await prisma.coffee.findMany({
-    include: { roaster: true, brewLogs: true },
+    include: { roaster: true },
   })
   const s = computeDashboard(coffees)
 

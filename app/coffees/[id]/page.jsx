@@ -2,7 +2,7 @@ import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '../../../lib/prisma.js'
-import { coffeeAvgScore } from '../../../lib/stats.js'
+import { coffeeScore } from '../../../lib/stats.js'
 import { deleteCoffee, toggleWouldBuyAgain } from '../../../lib/actions.js'
 
 export const dynamic = 'force-dynamic'
@@ -15,11 +15,11 @@ export default async function CoffeeDetailPage({ params }) {
   const { id } = await params
   const coffee = await prisma.coffee.findUnique({
     where: { id },
-    include: { roaster: true, brewLogs: { orderBy: { brewedAt: 'desc' } } },
+    include: { roaster: true },
   })
   if (!coffee) notFound()
 
-  const avg = coffeeAvgScore(coffee)
+  const score = coffeeScore(coffee)
 
   const info = [
     ['Обсмажчик', coffee.roaster?.name],
@@ -42,7 +42,7 @@ export default async function CoffeeDetailPage({ params }) {
         <div className="spacer" />
         <Link href={`/coffees/${coffee.id}/edit`} className="btn btn--secondary btn--sm">Редагувати</Link>
         <div className="score-pill" style={{ fontSize: '2rem' }}>
-          {avg != null ? avg.toFixed(1) : '—'}<br /><small>сер. оцінка /10</small>
+          {score != null ? score.toFixed(1) : '—'}<br /><small>моя оцінка /10</small>
         </div>
       </div>
 
