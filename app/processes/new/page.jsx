@@ -1,18 +1,18 @@
 import Link from 'next/link'
-import { createRoaster } from '../../../lib/actions.js'
+import { createProcess } from '../../../lib/actions.js'
 
-export default function NewRoasterPage() {
+export default function NewProcessPage() {
   return (
     <div>
       <div className="page-head">
-        <h1>Новий обсмажчик</h1>
-        <p className="sub">Хто смажив цю каву</p>
+        <h1>Нова обробка кави</h1>
+        <p className="sub">Спосіб обробки зерна</p>
       </div>
 
-      <form action={createRoaster} className="stack card">
+      <form action={createProcess} className="stack card">
         <div className="field">
           <label>Назва *</label>
-          <input name="name" required placeholder="Foundation Coffee Roasters" />
+          <input name="name" required placeholder="washed / natural / anaerobic…" />
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <button className="btn btn--primary" type="submit">Зберегти</button>
