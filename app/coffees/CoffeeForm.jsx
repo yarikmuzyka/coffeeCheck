@@ -46,8 +46,8 @@ export function CoffeeForm({ action, roasters, processes, coffee, submitLabel, c
 
       <div className="row-3">
         <div className="field">
-          <label>Обробка</label>
-          <input name="process" list="processes" defaultValue={coffee?.process ?? ''} placeholder="washed" />
+          <label>Обробка *</label>
+          <input name="process" list="processes" required defaultValue={coffee?.process ?? ''} placeholder="washed" />
           <Datalist id="processes" options={processes.map((p) => p.name)} />
         </div>
         <div className="field">
