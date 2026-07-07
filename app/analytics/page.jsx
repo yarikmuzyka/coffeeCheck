@@ -34,10 +34,6 @@ function buildRecommendations(coffees, s) {
   if (weakProcess) {
     recs.push({ type: 'warn', text: `Обробка «${weakProcess.key}» дає в середньому лише ${weakProcess.avg.toFixed(1)}/10 — можливо, це не твоє.` })
   }
-  // Best value
-  if (s.bestValue) {
-    recs.push({ type: 'value', text: `Best value: «${s.bestValue.coffee.name}» — ${s.bestValue.score.toFixed(1)}/10 за ${s.bestValue.coffee.pricePer100g} ₴/100г.` })
-  }
   return recs
 }
 

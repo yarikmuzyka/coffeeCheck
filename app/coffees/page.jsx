@@ -28,7 +28,7 @@ export default async function CoffeesPage({ searchParams }) {
     if (status === 'active' && c.isFinished) return false
     if (status === 'finished' && !c.isFinished) return false
     if (q) {
-      const hay = [c.name, c.roaster?.name, c.originCountry, c.region, c.variety, c.declaredNotes]
+      const hay = [c.name, c.roaster?.name, c.originCountry, c.region, c.variety]
         .filter(Boolean).join(' ').toLowerCase()
       if (!hay.includes(q)) return false
     }
@@ -38,7 +38,7 @@ export default async function CoffeesPage({ searchParams }) {
   const withScore = list.map((c) => ({ c, score: coffeeAvgScore(c) }))
   withScore.sort((a, b) => {
     if (sort === 'rating') return (b.score ?? -1) - (a.score ?? -1)
-    if (sort === 'price') return (b.c.pricePer100g ?? 0) - (a.c.pricePer100g ?? 0)
+    if (sort === 'price') return (b.c.price ?? 0) - (a.c.price ?? 0)
     return new Date(b.c.purchaseDate ?? b.c.createdAt) - new Date(a.c.purchaseDate ?? a.c.createdAt)
   })
 
@@ -57,7 +57,7 @@ export default async function CoffeesPage({ searchParams }) {
         <div className="row-3">
           <div className="field">
             <label>Пошук</label>
-            <input name="q" defaultValue={sp.q ?? ''} placeholder="назва, регіон, ноти…" />
+            <input name="q" defaultValue={sp.q ?? ''} placeholder="назва, регіон, сорт…" />
           </div>
           <div className="field">
             <label>Обсмажчик</label>
@@ -93,7 +93,7 @@ export default async function CoffeesPage({ searchParams }) {
             <select name="sort" defaultValue={sort}>
               <option value="date">за датою</option>
               <option value="rating">за рейтингом</option>
-              <option value="price">за ціною / 100г</option>
+              <option value="price">за ціною</option>
             </select>
           </div>
         </div>
@@ -116,9 +116,9 @@ export default async function CoffeesPage({ searchParams }) {
                   {c.isFinished && <span className="badge badge--finished">завершена</span>}
                 </h3>
                 <p className="meta">
-                  {[c.roaster?.name, c.originCountry, c.variety, c.process, c.roastLevel]
+                  {[c.roaster?.name, c.originCountry, c.variety, c.process]
                     .filter(Boolean).join(' · ')}
-                  {c.pricePer100g ? ` · ${c.pricePer100g} ₴/100г` : ''}
+                  {c.price ? ` · ${c.price} ₴` : ''}
                 </p>
               </div>
               <div className="score-pill">

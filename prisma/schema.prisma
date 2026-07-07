@@ -41,20 +41,10 @@ model Coffee {
   roaster       Roaster   @relation(fields: [roasterId], references: [id], onDelete: Cascade)
   originCountry String?
   region        String?
-  farm          String?
-  producer      String?
   variety       String?
   process       String?
-  roastLevel    String?
-  roastDate     DateTime?
   purchaseDate  DateTime?
   price         Float?
-  weightGrams   Int?
-  pricePer100g  Float?
-  declaredNotes String?
-  userNotes     String?
-  productUrl    String?
-  imageUrl      String?
   isFinished    Boolean   @default(false)
   wouldBuyAgain Boolean?
   brewLogs      BrewLog[]

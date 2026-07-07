@@ -24,15 +24,10 @@ export default async function CoffeeDetailPage({ params }) {
     ['Обсмажчик', coffee.roaster?.name],
     ['Країна', coffee.originCountry],
     ['Регіон', coffee.region],
-    ['Ферма', coffee.farm],
-    ['Виробник', coffee.producer],
     ['Сорт', coffee.variety],
     ['Обробка', coffee.process],
-    ['Обсмаження', coffee.roastLevel],
-    ['Дата обсмаження', fmtDate(coffee.roastDate)],
     ['Дата купівлі', fmtDate(coffee.purchaseDate)],
-    ['Ціна', coffee.price != null ? `${coffee.price} ₴ / ${coffee.weightGrams ?? '?'} г` : null],
-    ['Ціна / 100г', coffee.pricePer100g != null ? `${coffee.pricePer100g} ₴` : null],
+    ['Ціна', coffee.price != null ? `${coffee.price} ₴` : null],
   ].filter(([, v]) => v)
 
   return (
@@ -51,11 +46,6 @@ export default async function CoffeeDetailPage({ params }) {
       <div className="cols">
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Інформація</h2>
-          {coffee.imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coffee.imageUrl} alt={coffee.name}
-              style={{ width: '100%', borderRadius: 10, marginBottom: 12 }} />
-          )}
           <dl className="detail-grid">
             {info.map(([k, v]) => (
               <Fragment key={k}>
@@ -63,15 +53,6 @@ export default async function CoffeeDetailPage({ params }) {
               </Fragment>
             ))}
           </dl>
-          {coffee.declaredNotes && (
-            <p className="notes"><strong>Заявлені ноти:</strong> {coffee.declaredNotes}</p>
-          )}
-          {coffee.userNotes && (
-            <p className="notes"><strong>Мої нотатки:</strong> {coffee.userNotes}</p>
-          )}
-          {coffee.productUrl && (
-            <p><a href={coffee.productUrl} target="_blank" rel="noreferrer">Сторінка товару ↗</a></p>
-          )}
 
           <form action={toggleWouldBuyAgain} style={{ marginTop: 12 }}>
             <input type="hidden" name="id" value={coffee.id} />
