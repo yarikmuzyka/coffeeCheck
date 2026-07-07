@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { prisma } from '../../../lib/prisma.js'
 import { createCoffee } from '../../../lib/actions.js'
 import {
-  ORIGIN_COUNTRIES, VARIETIES, PROCESSES, ROAST_LEVELS,
+  ORIGIN_COUNTRIES, VARIETIES, ROAST_LEVELS,
 } from '../../../lib/constants.js'
 
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,10 @@ function Datalist({ id, options }) {
 }
 
 export default async function NewCoffeePage() {
-  const roasters = await prisma.roaster.findMany({ orderBy: { name: 'asc' } })
+  const [roasters, processes] = await Promise.all([
+    prisma.roaster.findMany({ orderBy: { name: 'asc' } }),
+    prisma.process.findMany({ orderBy: { name: 'asc' } }),
+  ])
 
   return (
     <div>
@@ -71,7 +74,7 @@ export default async function NewCoffeePage() {
           <div className="field">
             <label>Обробка</label>
             <input name="process" list="processes" placeholder="washed" />
-            <Datalist id="processes" options={PROCESSES} />
+            <Datalist id="processes" options={processes.map((p) => p.name)} />
           </div>
         </div>
 

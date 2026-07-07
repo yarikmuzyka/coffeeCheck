@@ -13,13 +13,13 @@ export default async function CoffeesPage({ searchParams }) {
   const status = sp.status ?? ''
   const sort = sp.sort ?? 'date'
 
-  const [allCoffees, roasters] = await Promise.all([
+  const [allCoffees, roasters, processes] = await Promise.all([
     prisma.coffee.findMany({ include: { roaster: true, brewLogs: true } }),
     prisma.roaster.findMany({ orderBy: { name: 'asc' } }),
+    prisma.process.findMany({ orderBy: { name: 'asc' } }),
   ])
 
   const countries = [...new Set(allCoffees.map((c) => c.originCountry).filter(Boolean))].sort()
-  const processes = [...new Set(allCoffees.map((c) => c.process).filter(Boolean))].sort()
 
   let list = allCoffees.filter((c) => {
     if (roasterId && c.roasterId !== roasterId) return false
@@ -77,7 +77,7 @@ export default async function CoffeesPage({ searchParams }) {
             <label>Обробка</label>
             <select name="process" defaultValue={process}>
               <option value="">усі</option>
-              {processes.map((p) => <option key={p} value={p}>{p}</option>)}
+              {processes.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
             </select>
           </div>
           <div className="field">
