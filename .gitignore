@@ -12,3 +12,7 @@ out
 # prisma sqlite
 prisma/*.db
 prisma/*.db-journal
+
+# local tooling / downloaded runtime (not portable — hardcoded paths, ~90MB node)
+.runtime
+.claude

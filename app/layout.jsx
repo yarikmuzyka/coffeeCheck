@@ -10,7 +10,6 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/coffees', label: 'Кави' },
   { href: '/roasters', label: 'Обсмажчики' },
-  { href: '/brew-logs/new', label: '+ Заварювання' },
   { href: '/analytics', label: 'Аналітика' },
 ]
 
