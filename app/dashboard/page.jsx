@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma.js'
 import { computeDashboard } from '../../lib/stats.js'
+import { pluralizeUk, formatWeightGrams } from '../../lib/format.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,12 +41,10 @@ export default async function DashboardPage() {
 
       <div className="stat-grid">
         <div className="stat">
-          <div className="label">Куплено кав</div>
-          <div className="value">{s.totalCoffees}</div>
-        </div>
-        <div className="stat">
-          <div className="label">Витрачено</div>
-          <div className="value">{s.totalSpent} <small>₴</small></div>
+          <div className="label">Всього</div>
+          <div className="value">
+            {s.totalCoffees} {pluralizeUk(s.totalCoffees, ['пачка', 'пачки', 'пачок'])} / {formatWeightGrams(s.totalWeightGrams)} / {s.totalSpent} <small>₴</small>
+          </div>
         </div>
       </div>
 
