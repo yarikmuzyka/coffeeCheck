@@ -51,8 +51,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="stat-grid">
-        <SummaryStat label="Всього" count={s.totalCoffees} weightGrams={s.totalWeightGrams} spent={s.totalSpent} />
         <SummaryStat label="Цей місяць" count={s.monthCoffees} weightGrams={s.monthWeightGrams} spent={s.monthSpent} />
+        <SummaryStat label="Всього" count={s.totalCoffees} weightGrams={s.totalWeightGrams} spent={s.totalSpent} />
       </div>
 
       <div className="cols" style={{ marginTop: 12 }}>
