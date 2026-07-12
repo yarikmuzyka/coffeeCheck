@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { deleteRoaster, deleteProcess } from '../../lib/actions.js'
+import { ConfirmSubmitButton } from '../components/ConfirmSubmitButton.jsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +32,13 @@ export default async function RoastersPage() {
               <h3>{r.name}</h3>
               <form action={deleteRoaster}>
                 <input type="hidden" name="id" value={r.id} />
-                <button className="btn btn--ghost btn--sm" title="Видалити (разом з кавами)">✕</button>
+                <ConfirmSubmitButton
+                  className="btn btn--ghost btn--sm"
+                  title="Видалити (разом з кавами)"
+                  message={`Видалити «${r.name}» разом з усіма його кавами та заварюваннями?`}
+                >
+                  ✕
+                </ConfirmSubmitButton>
               </form>
             </div>
           ))}
@@ -48,7 +55,13 @@ export default async function RoastersPage() {
               <h3>{p.name}</h3>
               <form action={deleteProcess}>
                 <input type="hidden" name="id" value={p.id} />
-                <button className="btn btn--ghost btn--sm" title="Видалити">✕</button>
+                <ConfirmSubmitButton
+                  className="btn btn--ghost btn--sm"
+                  title="Видалити"
+                  message={`Видалити обробку «${p.name}»?`}
+                >
+                  ✕
+                </ConfirmSubmitButton>
               </form>
             </div>
           ))}

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '../../../lib/prisma.js'
 import { coffeeScore } from '../../../lib/stats.js'
 import { deleteCoffee, toggleCoffeeFinished, toggleWouldBuyAgain } from '../../../lib/actions.js'
+import { ConfirmSubmitButton } from '../../components/ConfirmSubmitButton.jsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,7 +120,12 @@ export default async function CoffeeDetailPage({ params }) {
 
       <form action={deleteCoffee} style={{ marginTop: 32 }}>
         <input type="hidden" name="id" value={coffee.id} />
-        <button className="btn btn--ghost">Видалити каву</button>
+        <ConfirmSubmitButton
+          className="btn btn--ghost"
+          message="Видалити цю каву разом з усіма її заварюваннями? Цю дію не можна скасувати."
+        >
+          Видалити каву
+        </ConfirmSubmitButton>
       </form>
     </div>
   )
