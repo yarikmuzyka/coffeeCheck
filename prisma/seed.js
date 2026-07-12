@@ -15,6 +15,8 @@ const ROASTERS = [
   { name: 'Pilli', country: 'Ukraine', city: 'Kyiv' },
 ]
 
+const PROCESSES = ['washed', 'natural', 'anaerobic']
+
 async function main() {
   console.log('Seeding roasters…')
   const roasters = {}
@@ -22,6 +24,11 @@ async function main() {
     const created = await prisma.roaster.create({ data: r })
     roasters[r.name] = created
   }
+
+  console.log('Seeding coffee processes…')
+  await prisma.process.createMany({
+    data: PROCESSES.map((name) => ({ name })),
+  })
 
   console.log('Seeding sample coffees + brew logs…')
 
