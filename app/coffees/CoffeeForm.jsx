@@ -56,7 +56,7 @@ export function CoffeeForm({ action, roasters, processes, coffee, submitLabel, c
         </div>
         <div className="field">
           <label>Ціна (₴)</label>
-          <input type="number" step="0.01" name="price" defaultValue={coffee?.price ?? ''} placeholder="420" />
+          <input type="number" step="0.01" min="0" max="1000000" name="price" defaultValue={coffee?.price ?? ''} placeholder="420" />
         </div>
       </div>
 
