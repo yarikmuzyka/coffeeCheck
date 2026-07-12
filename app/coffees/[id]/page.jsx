@@ -15,7 +15,10 @@ export default async function CoffeeDetailPage({ params }) {
   const { id } = await params
   const coffee = await prisma.coffee.findUnique({
     where: { id },
-    include: { roaster: true },
+    include: {
+      roaster: true,
+      brewLogs: { orderBy: { brewedAt: 'desc' } },
+    },
   })
   if (!coffee) notFound()
 
@@ -66,6 +69,46 @@ export default async function CoffeeDetailPage({ params }) {
           </form>
         </div>
       </div>
+
+      <div className="toolbar" style={{ marginTop: 24 }}>
+        <div>
+          <h2 style={{ margin: 0 }}>Журнал заварювань</h2>
+          <p className="sub">{coffee.brewLogs.length} записів</p>
+        </div>
+        <div className="spacer" />
+        <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="btn btn--primary">
+          + Додати заварювання
+        </Link>
+      </div>
+
+      {coffee.brewLogs.length === 0 ? (
+        <p className="empty">Ще немає заварювань для цієї кави.</p>
+      ) : (
+        <div className="coffee-list">
+          {coffee.brewLogs.map((log) => (
+            <article key={log.id} className="card">
+              <div className="toolbar">
+                <div>
+                  <h3 style={{ margin: 0 }}>
+                    {log.method}{log.recipeName ? ` — ${log.recipeName}` : ''}
+                  </h3>
+                  <p className="meta">
+                    {[fmtDate(log.brewedAt), log.ratio, log.doseGrams != null ? `${log.doseGrams} г кави` : null,
+                      log.waterGrams != null ? `${log.waterGrams} г води` : null]
+                      .filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+                <div className="spacer" />
+                <div className="score-pill">
+                  {log.overallScore ?? '—'}<br /><small>/10</small>
+                </div>
+              </div>
+              {log.perceivedNotes && <p><strong>Ноти:</strong> {log.perceivedNotes}</p>}
+              {log.notes && <p className="meta">{log.notes}</p>}
+            </article>
+          ))}
+        </div>
+      )}
 
       <form action={deleteCoffee} style={{ marginTop: 32 }}>
         <input type="hidden" name="id" value={coffee.id} />
