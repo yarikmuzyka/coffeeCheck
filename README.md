@@ -6,13 +6,14 @@
 
 - **Next.js 14** (App Router, Server Actions)
 - **Prisma** ORM + **PostgreSQL** (Neon / Supabase / Vercel Postgres)
-- Без auth — single-user MVP
+- Single-user HTTP Basic Auth через `APP_USERNAME` / `APP_PASSWORD`
 - Деплой: **Vercel** (безкоштовно) — див. [DEPLOY.md](DEPLOY.md)
 
 ## Запуск
 
 Потрібен Postgres-конект (напр. безкоштовний [Neon](https://neon.tech)).
-Створи `.env` за зразком `.env.example` (`DATABASE_URL` + `DIRECT_URL`), тоді:
+Створи `.env` за зразком `.env.example` (`DATABASE_URL`, `DIRECT_URL`,
+`APP_USERNAME` і `APP_PASSWORD`), тоді:
 
 ```bash
 npm install          # встановити залежності + prisma generate
