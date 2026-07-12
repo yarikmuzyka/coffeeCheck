@@ -63,12 +63,12 @@ export default async function NewBrewLogPage({ searchParams }) {
         <fieldset>
           <legend>Параметри</legend>
           <div className="row-3">
-            <div className="field"><label>Доза (г)</label><input type="number" step="0.1" name="doseGrams" placeholder="15" /></div>
-            <div className="field"><label>Вода (г)</label><input type="number" step="1" name="waterGrams" placeholder="250" /></div>
-            <div className="field"><label>Темп. води (°C)</label><input type="number" step="0.5" name="waterTempC" placeholder="94" /></div>
+            <div className="field"><label>Доза (г)</label><input type="number" step="0.1" min="0.1" max="1000" name="doseGrams" placeholder="15" /></div>
+            <div className="field"><label>Вода (г)</label><input type="number" step="0.1" min="0.1" max="10000" name="waterGrams" placeholder="250" /></div>
+            <div className="field"><label>Темп. води (°C)</label><input type="number" step="0.5" min="0" max="100" name="waterTempC" placeholder="94" /></div>
             <div className="field"><label>Помел</label><input name="grindSize" placeholder="medium-fine" /></div>
             <div className="field"><label>Кавомолка</label><input name="grinder" placeholder="Comandante C40" /></div>
-            <div className="field"><label>Час (с)</label><input type="number" name="brewTimeSeconds" placeholder="165" /></div>
+            <div className="field"><label>Час (с)</label><input type="number" min="1" max="86400" name="brewTimeSeconds" placeholder="165" /></div>
             <div className="field"><label>Вода (назва)</label><input name="waterName" placeholder="Third Wave Water" /></div>
             <div className="field"><label>Фільтр</label><input name="filterType" placeholder="Hario tabbed" /></div>
             <div className="field"><label>Воронка / девайс</label><input name="brewer" placeholder="Hario V60 02" /></div>
