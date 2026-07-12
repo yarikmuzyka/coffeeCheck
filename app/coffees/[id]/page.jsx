@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '../../../lib/prisma.js'
 import { coffeeScore } from '../../../lib/stats.js'
-import { deleteCoffee, toggleWouldBuyAgain } from '../../../lib/actions.js'
+import { deleteCoffee, toggleCoffeeFinished, toggleWouldBuyAgain } from '../../../lib/actions.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,6 +65,13 @@ export default async function CoffeeDetailPage({ params }) {
             <input type="hidden" name="value" value={coffee.wouldBuyAgain ? 'false' : 'true'} />
             <button className={`btn btn--sm ${coffee.wouldBuyAgain ? 'btn--secondary' : 'btn--primary'}`}>
               {coffee.wouldBuyAgain ? '✓ Купив би ще раз' : 'Позначити «купив би ще раз»'}
+            </button>
+          </form>
+          <form action={toggleCoffeeFinished} style={{ marginTop: 10 }}>
+            <input type="hidden" name="id" value={coffee.id} />
+            <input type="hidden" name="value" value={coffee.isFinished ? 'false' : 'true'} />
+            <button className={`btn btn--sm ${coffee.isFinished ? 'btn--secondary' : 'btn--ghost'}`}>
+              {coffee.isFinished ? '✓ Пачка завершена — повернути в активні' : 'Позначити пачку завершеною'}
             </button>
           </form>
         </div>
