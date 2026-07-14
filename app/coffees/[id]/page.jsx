@@ -7,6 +7,7 @@ import { deleteCoffee, toggleCoffeeFinished, toggleWouldBuyAgain } from '../../.
 import { ConfirmSubmitButton } from '../../components/ConfirmSubmitButton.jsx'
 import { requireUser } from '../../../lib/auth.js'
 import { findOwnedCoffee } from '../../../lib/owned-coffees.js'
+import { getUsageSnapshot } from '../../../lib/entitlements.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,14 +18,17 @@ function fmtDate(d) {
 export default async function CoffeeDetailPage({ params }) {
   const user = await requireUser()
   const { id } = await params
-  const coffee = await findOwnedCoffee(prisma, {
-    id,
-    userId: user.id,
-    include: {
-      roaster: true,
-      brewLogs: { where: { userId: user.id }, orderBy: { brewedAt: 'desc' } },
-    },
-  })
+  const [coffee, usage] = await Promise.all([
+    findOwnedCoffee(prisma, {
+      id,
+      userId: user.id,
+      include: {
+        roaster: true,
+        brewLogs: { where: { userId: user.id }, orderBy: { brewedAt: 'desc' } },
+      },
+    }),
+    getUsageSnapshot(prisma, user.id),
+  ])
   if (!coffee) notFound()
 
   const score = coffeeScore(coffee)
@@ -88,9 +92,13 @@ export default async function CoffeeDetailPage({ params }) {
           <p className="sub">{coffee.brewLogs.length} записів</p>
         </div>
         <div className="spacer" />
-        <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="btn btn--primary">
-          + Додати заварювання
-        </Link>
+        {usage.resources.brewLogs.reached ? (
+          <span className="btn btn--disabled" aria-disabled="true">Ліміт заварювань вичерпано</span>
+        ) : (
+          <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="btn btn--primary">
+            + Додати заварювання
+          </Link>
+        )}
       </div>
 
       {coffee.brewLogs.length === 0 ? (

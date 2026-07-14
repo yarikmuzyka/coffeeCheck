@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { coffeeScore } from '../../lib/stats.js'
 import { requireUser } from '../../lib/auth.js'
+import { getUsageSnapshot } from '../../lib/entitlements.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,10 +16,11 @@ export default async function CoffeesPage({ searchParams }) {
   const status = sp.status ?? ''
   const sort = sp.sort ?? 'date'
 
-  const [allCoffees, roasters, processes] = await Promise.all([
+  const [allCoffees, roasters, processes, usage] = await Promise.all([
     prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true } }),
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
+    getUsageSnapshot(prisma, user.id),
   ])
 
   const countries = [...new Set(allCoffees.map((c) => c.originCountry).filter(Boolean))].sort()
@@ -52,7 +54,11 @@ export default async function CoffeesPage({ searchParams }) {
           <p className="sub">{list.length} із {allCoffees.length}</p>
         </div>
         <div className="spacer" />
-        <Link href="/coffees/new" className="btn btn--primary">+ Додати каву</Link>
+        {usage.resources.coffees.reached ? (
+          <span className="btn btn--disabled" aria-disabled="true">Ліміт кав вичерпано</span>
+        ) : (
+          <Link href="/coffees/new" className="btn btn--primary">+ Додати каву</Link>
+        )}
       </div>
 
       <form className="card" method="get" style={{ marginBottom: 18 }}>

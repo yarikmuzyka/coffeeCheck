@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/prisma.js'
 import { createBrewLog } from '../../../lib/actions.js'
 import { BREW_METHODS, SCORE_FIELDS } from '../../../lib/constants.js'
 import { requireUser } from '../../../lib/auth.js'
+import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { LimitReached } from '../../components/UsagePanel.jsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,11 +12,18 @@ export default async function NewBrewLogPage({ searchParams }) {
   const user = await requireUser()
   const sp = await searchParams
   const preselect = sp.coffee ?? ''
-  const coffees = await prisma.coffee.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: 'desc' },
-    include: { roaster: true },
-  })
+  const [coffees, usage] = await Promise.all([
+    prisma.coffee.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      include: { roaster: true },
+    }),
+    getUsageSnapshot(prisma, user.id),
+  ])
+
+  if (usage.resources.brewLogs.reached) {
+    return <LimitReached resourceLabel="Заварювання" state={usage.resources.brewLogs} backHref="/coffees" />
+  }
 
   return (
     <div>

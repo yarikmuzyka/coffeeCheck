@@ -3,15 +3,22 @@ import { prisma } from '../../../lib/prisma.js'
 import { createCoffee } from '../../../lib/actions.js'
 import { CoffeeForm } from '../CoffeeForm.jsx'
 import { requireUser } from '../../../lib/auth.js'
+import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { LimitReached } from '../../components/UsagePanel.jsx'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewCoffeePage() {
   const user = await requireUser()
-  const [roasters, processes] = await Promise.all([
+  const [roasters, processes, usage] = await Promise.all([
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
+    getUsageSnapshot(prisma, user.id),
   ])
+
+  if (usage.resources.coffees.reached) {
+    return <LimitReached resourceLabel="Кави" state={usage.resources.coffees} backHref="/coffees" />
+  }
 
   return (
     <div>

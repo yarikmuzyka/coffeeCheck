@@ -15,6 +15,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Plan {
+  FREE
+  PRO
+}
+
 model Process {
   id        String   @id @default(cuid())
   name      String
@@ -108,17 +113,31 @@ model BrewLog {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String            @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?           @unique
   emailVerified DateTime?
   image         String?
+  plan          Plan              @default(FREE)
   accounts      Account[]
   sessions      Session[]
-  processes     Process[] @relation("UserProcesses")
-  roasters      Roaster[] @relation("UserRoasters")
-  coffees       Coffee[]  @relation("UserCoffees")
-  brewLogs      BrewLog[] @relation("UserBrewLogs")
+  processes     Process[]         @relation("UserProcesses")
+  roasters      Roaster[]         @relation("UserRoasters")
+  coffees       Coffee[]          @relation("UserCoffees")
+  brewLogs      BrewLog[]         @relation("UserBrewLogs")
+  rateLimits    RateLimitBucket[]
+}
+
+model RateLimitBucket {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String
+  windowStart DateTime
+  count       Int      @default(1)
+
+  @@unique([userId, action, windowStart])
+  @@index([windowStart])
 }
 
 model Account {
