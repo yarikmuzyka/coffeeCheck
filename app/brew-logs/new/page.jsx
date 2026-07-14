@@ -2,13 +2,16 @@ import Link from 'next/link'
 import { prisma } from '../../../lib/prisma.js'
 import { createBrewLog } from '../../../lib/actions.js'
 import { BREW_METHODS, SCORE_FIELDS } from '../../../lib/constants.js'
+import { requireUser } from '../../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewBrewLogPage({ searchParams }) {
+  const user = await requireUser()
   const sp = await searchParams
   const preselect = sp.coffee ?? ''
   const coffees = await prisma.coffee.findMany({
+    where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
     include: { roaster: true },
   })

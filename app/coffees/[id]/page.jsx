@@ -5,6 +5,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { coffeeScore } from '../../../lib/stats.js'
 import { deleteCoffee, toggleCoffeeFinished, toggleWouldBuyAgain } from '../../../lib/actions.js'
 import { ConfirmSubmitButton } from '../../components/ConfirmSubmitButton.jsx'
+import { requireUser } from '../../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,12 +14,13 @@ function fmtDate(d) {
 }
 
 export default async function CoffeeDetailPage({ params }) {
+  const user = await requireUser()
   const { id } = await params
-  const coffee = await prisma.coffee.findUnique({
-    where: { id },
+  const coffee = await prisma.coffee.findFirst({
+    where: { id, userId: user.id },
     include: {
       roaster: true,
-      brewLogs: { orderBy: { brewedAt: 'desc' } },
+      brewLogs: { where: { userId: user.id }, orderBy: { brewedAt: 'desc' } },
     },
   })
   if (!coffee) notFound()

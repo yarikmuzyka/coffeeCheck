@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma.js'
 import { computeDashboard } from '../../lib/stats.js'
 import { pluralizeUk, formatWeightGrams } from '../../lib/format.js'
+import { requireUser } from '../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,9 @@ function TopList({ title, items }) {
 }
 
 export default async function DashboardPage() {
+  const user = await requireUser()
   const coffees = await prisma.coffee.findMany({
+    where: { userId: user.id },
     include: { roaster: true },
   })
   const s = computeDashboard(coffees)

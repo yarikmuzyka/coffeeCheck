@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { computeDashboard, coffeeScore } from '../../lib/stats.js'
+import { requireUser } from '../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,7 +59,9 @@ function FullTop({ title, items, unit = '/10' }) {
 }
 
 export default async function AnalyticsPage() {
+  const user = await requireUser()
   const coffees = await prisma.coffee.findMany({
+    where: { userId: user.id },
     include: { roaster: true },
   })
   const s = computeDashboard(coffees)

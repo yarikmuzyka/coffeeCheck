@@ -2,13 +2,15 @@ import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { deleteRoaster, deleteProcess } from '../../lib/actions.js'
 import { ConfirmSubmitButton } from '../components/ConfirmSubmitButton.jsx'
+import { requireUser } from '../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
 export default async function RoastersPage() {
+  const user = await requireUser()
   const [roasters, processes] = await Promise.all([
-    prisma.roaster.findMany({ orderBy: { name: 'asc' } }),
-    prisma.process.findMany({ orderBy: { name: 'asc' } }),
+    prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
+    prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
   ])
 
   return (

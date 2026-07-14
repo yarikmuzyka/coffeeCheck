@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { coffeeScore } from '../../lib/stats.js'
+import { requireUser } from '../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CoffeesPage({ searchParams }) {
+  const user = await requireUser()
   const sp = await searchParams
   const q = (sp.q ?? '').trim().toLowerCase()
   const roasterId = sp.roaster ?? ''
@@ -14,9 +16,9 @@ export default async function CoffeesPage({ searchParams }) {
   const sort = sp.sort ?? 'date'
 
   const [allCoffees, roasters, processes] = await Promise.all([
-    prisma.coffee.findMany({ include: { roaster: true } }),
-    prisma.roaster.findMany({ orderBy: { name: 'asc' } }),
-    prisma.process.findMany({ orderBy: { name: 'asc' } }),
+    prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true } }),
+    prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
+    prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
   ])
 
   const countries = [...new Set(allCoffees.map((c) => c.originCountry).filter(Boolean))].sort()

@@ -4,16 +4,15 @@
 
 ## Стек
 
-- **Next.js 14** (App Router, Server Actions)
+- **Next.js 15** (App Router, Server Actions)
 - **Prisma** ORM + **PostgreSQL** (Neon / Supabase / Vercel Postgres)
-- Single-user HTTP Basic Auth через `APP_USERNAME` / `APP_PASSWORD`
+- **Auth.js** + Google OAuth, ізоляція даних за користувачем
 - Деплой: **Vercel** (безкоштовно) — див. [DEPLOY.md](DEPLOY.md)
 
 ## Запуск
 
 Потрібен Postgres-конект (напр. безкоштовний [Neon](https://neon.tech)).
-Створи `.env` за зразком `.env.example` (`DATABASE_URL`, `DIRECT_URL`,
-`APP_USERNAME` і `APP_PASSWORD`), тоді:
+Створи `.env` за зразком `.env.example` (Postgres + Google OAuth), тоді:
 
 ```bash
 npm install          # встановити залежності + prisma generate
@@ -27,6 +26,7 @@ npm run dev          # http://localhost:3000
 ```bash
 npm run db:reset     # перестворити базу + пересідити
 npm run build        # production-білд
+npm run db:claim-owner # одноразово привʼязати старі дані після першого Google-входу
 ```
 
 ## Що вміє MVP
@@ -53,11 +53,13 @@ app/
   analytics/        розширена аналітика + рекомендації
 lib/
   prisma.js         клієнт БД
+  auth-options.js   конфігурація Auth.js + Google
+  auth.js           поточний авторизований користувач
   actions.js        server actions (CRUD)
   stats.js          обчислення аналітики
   constants.js      опції для форм
 prisma/
-  schema.prisma     Roaster / Coffee / BrewLog
+  schema.prisma     Auth.js + персональні Process / Roaster / Coffee / BrewLog
   seed.js           демо-дані
 ```
 
@@ -74,7 +76,7 @@ prisma/
 
 ## Наступні кроки (з брифу)
 
-- Auth (Google OAuth / NextAuth)
+- Завершити backfill і перевірити ізоляцію двох Google-акаунтів
 - Завантаження фото пакету в S3 + розпізнавання
 - Публічні рейтинги, соціальна частина
 - Price tracking
