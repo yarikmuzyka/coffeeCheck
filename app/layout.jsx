@@ -5,9 +5,10 @@ import { SignOutButton } from './components/SignOutButton.jsx'
 import { HeaderUsage } from './components/HeaderUsage.jsx'
 import { getUsageSnapshot } from '../lib/entitlements.js'
 import { prisma } from '../lib/prisma.js'
+import { LogoMark } from './components/LogoMark.jsx'
 
 export const metadata = {
-  title: 'coffeeCheck ☕ — Brew Journal',
+  title: 'coffee logger — Brew Journal',
   description: 'Відстежуй specialty каву, заварювання та власні смакові вподобання',
 }
 
@@ -27,7 +28,10 @@ export default async function RootLayout({ children }) {
     <html lang="uk">
       <body>
         <header className="topbar">
-          <Link href={user ? '/dashboard' : '/login'} className="brand">☕ coffeeCheck</Link>
+          <Link href={user ? '/dashboard' : '/login'} className="brand">
+            <LogoMark className="brand-logo-mark" />
+            <span>coffee logger</span>
+          </Link>
           {user && (
             <>
               <nav className="nav">

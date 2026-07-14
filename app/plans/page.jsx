@@ -8,7 +8,7 @@ export default function PlansPage() {
     <div>
       <div className="page-head">
         <h1>Тарифи</h1>
-        <p className="sub">Порівняй можливості coffeeCheck</p>
+        <p className="sub">Порівняй можливості coffee logger</p>
       </div>
 
       <div className="plan-grid">

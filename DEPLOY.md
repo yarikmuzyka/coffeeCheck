@@ -1,4 +1,4 @@
-# Деплой coffeeCheck на Vercel (безкоштовно)
+# Деплой coffee logger на Vercel (безкоштовно)
 
 Стек рантайму: **Vercel (Hobby, $0)** + **Neon Postgres (Free, $0)**.
 GitHub Pages не підходить — застосунок динамічний (SSR + Server Actions + БД).

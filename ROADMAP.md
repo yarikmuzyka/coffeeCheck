@@ -1,10 +1,10 @@
-# coffeeCheck — Product Roadmap
+# coffee logger — Product Roadmap
 
 Оновлено: 14 липня 2026
 
 ## Бачення продукту
 
-coffeeCheck допомагає людям, які регулярно купують specialty coffee, памʼятати
+coffee logger допомагає людям, які регулярно купують specialty coffee, памʼятати
 улюблені лоти, покращувати рецепти заварювання та краще розуміти власні смакові
 вподобання.
 

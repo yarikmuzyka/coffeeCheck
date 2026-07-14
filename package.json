@@ -1,5 +1,5 @@
 {
-  "name": "coffeecheck",
+  "name": "coffee-logger",
   "version": "0.1.0",
   "private": true,
   "scripts": {

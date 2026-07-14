@@ -1,5 +1,5 @@
 /* ============================================================
-   coffeeCheck — «Яскрава й смілива» тема
+   coffee logger — «Яскрава й смілива» тема
    Чанкова типографіка, великі округлі форми, кольорові чипи/бейджі.
    Кольори — через токени; є світла (типова) й темна (prefers-color-scheme).
    ============================================================ */
@@ -101,6 +101,16 @@ a:hover { text-decoration: underline; }
   align-items: center;
   gap: 6px;
 }
+.logo-mark {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.logo-mark-check { stroke: var(--logo-check, currentColor); }
+.brand-logo-mark { width: 35px; height: 35px; flex: none; --logo-check: currentColor; }
 .brand:hover { text-decoration: none; transform: rotate(-1.5deg) scale(1.02); }
 .brand { transition: transform 0.15s ease; }
 .nav { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -135,7 +145,17 @@ a:hover { text-decoration: underline; }
 .login-shell { min-height: 65vh; display: grid; place-items: center; }
 .login-card { width: min(100%, 480px); text-align: center; padding: 40px 32px; }
 .login-card .sub { margin: 8px 0 24px; }
-.login-mark { font-size: 3rem; margin-bottom: 8px; }
+.login-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.login-logo-mark { width: 58px; height: 58px; --logo-check: var(--accent); }
 .auth-error { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border-radius: var(--radius-sm); padding: 10px 12px; }
 
 /* ---------------- typography ---------------- */

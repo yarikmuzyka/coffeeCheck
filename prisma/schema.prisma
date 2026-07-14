@@ -1,4 +1,4 @@
-// coffeeCheck — Coffee Tracker / Brew Journal
+// coffee logger — Coffee Tracker / Brew Journal
 // PostgreSQL (Neon/Supabase/Vercel Postgres) для деплою на Vercel.
 //   DATABASE_URL — пулований конект (runtime у serverless)
 //   DIRECT_URL   — прямий конект (для `prisma db push` / migrate)

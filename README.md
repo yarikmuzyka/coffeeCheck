@@ -1,4 +1,4 @@
-# ☕ coffeeCheck — Coffee Tracker / Brew Journal
+# coffee logger — Coffee Tracker / Brew Journal
 
 Веб-сервіс для відстеження specialty кави: журнал покупок, журнал заварювань, оцінки та персональна аналітика смакових вподобань.
 

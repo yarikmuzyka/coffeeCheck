@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '../../lib/auth.js'
 import { GoogleSignInButton } from '../components/GoogleSignInButton.jsx'
+import { LogoMark } from '../components/LogoMark.jsx'
 
 const ERROR_MESSAGES = {
   OAuthAccountNotLinked: 'Ця адреса вже привʼязана до іншого способу входу.',
@@ -18,7 +19,10 @@ export default async function LoginPage({ searchParams }) {
   return (
     <section className="login-shell">
       <div className="card login-card">
-        <div className="login-mark">☕</div>
+        <div className="login-brand">
+          <LogoMark className="login-logo-mark" />
+          <span>coffee logger</span>
+        </div>
         <h1>Твоя кава. Твої рецепти.</h1>
         <p className="sub">Увійди, щоб вести власний журнал заварювань.</p>
         {error && <p className="auth-error" role="alert">{error}</p>}
