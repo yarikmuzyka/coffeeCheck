@@ -114,6 +114,17 @@ a:hover { text-decoration: underline; }
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 .nav a:hover { text-decoration: none; opacity: 1; background: rgba(255, 255, 255, 0.18); }
+.nav-disabled {
+  color: var(--on-accent);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  opacity: 0.45;
+  filter: blur(0.7px);
+  cursor: not-allowed;
+  user-select: none;
+}
 .account-menu { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .account-name { color: var(--on-accent); font-size: 0.85rem; font-weight: 700; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.65); }

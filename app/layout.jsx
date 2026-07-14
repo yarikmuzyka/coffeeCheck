@@ -12,7 +12,7 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/coffees', label: 'Кави' },
   { href: '/roasters', label: 'Обсмажчики' },
-  { href: '/analytics', label: 'Аналітика' },
+  { href: '/analytics', label: 'Аналітика', disabled: true },
 ]
 
 export default async function RootLayout({ children }) {
@@ -26,7 +26,9 @@ export default async function RootLayout({ children }) {
           {user && (
             <>
               <nav className="nav">
-                {NAV.map((n) => (
+                {NAV.map((n) => n.disabled ? (
+                  <span key={n.href} className="nav-disabled" aria-disabled="true">{n.label}</span>
+                ) : (
                   <Link key={n.href} href={n.href}>{n.label}</Link>
                 ))}
               </nav>
