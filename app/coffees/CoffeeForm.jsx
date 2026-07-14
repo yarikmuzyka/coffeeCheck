@@ -10,6 +10,8 @@ function toDateInput(d) {
 }
 
 export function CoffeeForm({ action, roasters, processes, coffee, submitLabel, cancelHref }) {
+  const today = new Date().toISOString().slice(0, 10)
+
   return (
     <form action={action} className="stack card">
       {coffee && <input type="hidden" name="id" value={coffee.id} />}
@@ -54,7 +56,7 @@ export function CoffeeForm({ action, roasters, processes, coffee, submitLabel, c
         </div>
         <div className="field">
           <label>Дата купівлі</label>
-          <input type="date" name="purchaseDate" defaultValue={toDateInput(coffee?.purchaseDate)} />
+          <input type="date" name="purchaseDate" max={today} defaultValue={toDateInput(coffee?.purchaseDate)} />
         </div>
         <div className="field">
           <label>Ціна (₴)</label>

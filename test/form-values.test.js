@@ -19,4 +19,8 @@ test('optionalDate validates supplied dates', () => {
   assert.equal(optionalDate('2026-07-12', 'Дата').toISOString(), '2026-07-12T00:00:00.000Z')
   assert.throws(() => optionalDate('not-a-date', 'Дата'))
   assert.throws(() => optionalDate('2026-02-31', 'Дата'))
+  assert.throws(
+    () => optionalDate('2926-07-09', 'Дата купівлі', { max: '2026-07-14' }),
+    /дата не може бути пізніше/,
+  )
 })
