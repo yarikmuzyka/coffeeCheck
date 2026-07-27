@@ -76,6 +76,9 @@ export default async function RootLayout({ children }) {
           )}
         </header>
         <main className="container">{children}</main>
+        <footer className="app-footer">
+          coffee logger v{process.env.NEXT_PUBLIC_APP_VERSION} · {process.env.NEXT_PUBLIC_BUILD_SHA}
+        </footer>
       </body>
     </html>
   )
