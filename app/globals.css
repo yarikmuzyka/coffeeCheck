@@ -143,6 +143,15 @@ a:hover { text-decoration: underline; }
 
 .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 96px; }
 
+.app-footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
 /* PWA standalone на iPhone: viewport-fit=cover прибирає системні відступи,
    тож «чубчик» і домашній індикатор компенсуємо через safe-area-inset. */
 @supports (padding: env(safe-area-inset-top)) {
