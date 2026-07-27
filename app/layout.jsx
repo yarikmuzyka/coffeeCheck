@@ -10,6 +10,31 @@ import { LogoMark } from './components/LogoMark.jsx'
 export const metadata = {
   title: 'coffee logger — Brew Journal',
   description: 'Відстежуй specialty каву, заварювання та власні смакові вподобання',
+  applicationName: 'coffee logger',
+  appleWebApp: {
+    capable: true,
+    title: 'coffee logger',
+    statusBarStyle: 'default',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+}
+
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ff6b35' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1206' },
+  ],
+  // cover — щоб standalone-режим на iPhone малювався під статус-баром,
+  // а відступи контролювались через env(safe-area-inset-*)
+  viewportFit: 'cover',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 const NAV = [
