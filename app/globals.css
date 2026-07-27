@@ -142,6 +142,21 @@ a:hover { text-decoration: underline; }
 .btn--topbar:hover { background: rgba(255, 255, 255, 0.22); }
 
 .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 96px; }
+
+/* PWA standalone на iPhone: viewport-fit=cover прибирає системні відступи,
+   тож «чубчик» і домашній індикатор компенсуємо через safe-area-inset. */
+@supports (padding: env(safe-area-inset-top)) {
+  .topbar {
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-left: calc(clamp(16px, 4vw, 28px) + env(safe-area-inset-left));
+    padding-right: calc(clamp(16px, 4vw, 28px) + env(safe-area-inset-right));
+  }
+  .container {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(20px + env(safe-area-inset-right));
+  }
+}
 .login-shell { min-height: 65vh; display: grid; place-items: center; }
 .login-card { width: min(100%, 480px); text-align: center; padding: 40px 32px; }
 .login-card .sub { margin: 8px 0 24px; }
