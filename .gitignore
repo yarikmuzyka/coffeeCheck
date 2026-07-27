@@ -16,3 +16,6 @@ prisma/*.db-journal
 # local tooling / downloaded runtime (not portable — hardcoded paths, ~90MB node)
 .runtime
 .claude
+
+# продуктовий roadmap — локальний робочий документ, не для паблік-репо
+ROADMAP.md
