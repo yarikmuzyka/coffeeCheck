@@ -285,6 +285,10 @@ h3 { font-weight: 800; letter-spacing: -0.015em; }
 .btn--primary:hover { background: var(--accent-strong); box-shadow: 0 12px 22px -8px var(--accent); }
 .btn--secondary { background: var(--bg-2); color: var(--accent-strong); border-color: var(--border); }
 .btn--secondary:hover { border-color: var(--accent); }
+.btn--danger { background: var(--bad); color: #fff; }
+.btn--danger:hover { background: color-mix(in srgb, var(--bad) 84%, #000); }
+.btn--danger-outline { background: transparent; color: var(--bad); border-color: color-mix(in srgb, var(--bad) 55%, var(--border)); }
+.btn--danger-outline:hover { background: color-mix(in srgb, var(--bad) 12%, transparent); border-color: var(--bad); }
 .btn--ghost { background: transparent; color: var(--muted); padding: 7px 12px; font-weight: 700; }
 .btn--ghost:hover { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
 .btn--sm { padding: 7px 14px; font-size: 0.85rem; }
@@ -527,9 +531,118 @@ a.coffee-row:hover { text-decoration: none; transform: translateY(-2px); border-
 .empty { text-align: center; color: var(--muted); padding: 56px 0; font-weight: 600; }
 
 /* ---------------- detail page ---------------- */
+.coffee-detail-back {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+.coffee-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.coffee-detail-title { flex: 1; min-width: 0; }
+.coffee-detail-head-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex: none;
+}
+.coffee-detail-action-stack {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6px;
+  width: 136px;
+  height: 88px;
+}
+.coffee-detail-action-stack form { display: contents; }
+.coffee-detail-action-stack .btn {
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  padding: 5px 10px;
+}
+.score-pill--detail {
+  width: 96px;
+  height: 88px;
+  padding: 8px;
+  font-size: 2rem;
+}
+.coffee-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+  gap: 20px;
+  align-items: start;
+}
+.coffee-detail-section-title { margin-top: 0; }
+.coffee-detail-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.coffee-detail-journal { min-width: 0; }
+.coffee-detail-journal-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.coffee-detail-journal-head h2 { margin: 0; }
+.coffee-detail-journal-head .spacer { flex: 1; }
+.coffee-detail-empty {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 24px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--muted);
+  text-align: center;
+}
+.coffee-detail-empty span { font-size: 2.2rem; color: var(--accent); }
+.coffee-detail-empty p { margin: 8px 0 0; font-weight: 700; }
 .detail-grid { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
 .detail-grid dt { color: var(--muted); font-size: 0.88rem; font-weight: 600; }
 .detail-grid dd { margin: 0; font-weight: 600; }
+.confirm-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 0;
+  border: 2px solid var(--bad);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 28px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.confirm-dialog::backdrop { background: rgba(10, 5, 1, 0.74); }
+.confirm-dialog__content { padding: 24px; }
+.confirm-dialog__content h2 { margin: 0 0 8px; }
+.confirm-dialog__content p { margin: 0; color: var(--muted); }
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+@media (max-width: 820px) {
+  .coffee-detail-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .coffee-detail-header { flex-wrap: wrap; }
+  .coffee-detail-title { flex-basis: 100%; }
+  .coffee-detail-head-actions { width: 100%; }
+  .coffee-detail-action-stack { flex: 1; }
+}
+@media (max-width: 420px) {
+  .detail-grid { grid-template-columns: 1fr; gap: 2px; }
+  .detail-grid dd { margin-bottom: 8px; }
+  .coffee-detail-journal-head .btn { width: 100%; justify-content: center; }
+}
 .notes { font-size: 0.92rem; }
 .mono { font-variant-numeric: tabular-nums; }
 .chip {
