@@ -3,18 +3,38 @@ import { prisma } from '../../lib/prisma.js'
 import { coffeeScore } from '../../lib/stats.js'
 import { requireUser } from '../../lib/auth.js'
 import { getUsageSnapshot } from '../../lib/entitlements.js'
+import { sortCoffeeEntries } from '../../lib/coffee-sort.js'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CoffeesPage({ searchParams }) {
   const user = await requireUser()
   const sp = await searchParams
-  const q = (sp.q ?? '').trim().toLowerCase()
+  const query = (sp.q ?? '').trim()
+  const q = query.toLowerCase()
   const roasterId = sp.roaster ?? ''
   const country = sp.country ?? ''
   const process = sp.process ?? ''
   const status = sp.status ?? ''
   const sort = sp.sort ?? 'date'
+
+  const coffeeHref = (overrides = {}) => {
+    const values = {
+      q: query,
+      roaster: roasterId,
+      country,
+      process,
+      status,
+      sort,
+      ...overrides,
+    }
+    const params = new URLSearchParams()
+    Object.entries(values).forEach(([key, value]) => {
+      if (value) params.set(key, value)
+    })
+    const search = params.toString()
+    return search ? `/coffees?${search}` : '/coffees'
+  }
 
   const [allCoffees, roasters, processes, usage] = await Promise.all([
     prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true } }),
@@ -39,12 +59,18 @@ export default async function CoffeesPage({ searchParams }) {
     return true
   })
 
-  const withScore = list.map((c) => ({ c, score: coffeeScore(c) }))
-  withScore.sort((a, b) => {
-    if (sort === 'rating') return (b.score ?? -1) - (a.score ?? -1)
-    if (sort === 'price') return (b.c.price ?? 0) - (a.c.price ?? 0)
-    return new Date(b.c.purchaseDate ?? b.c.createdAt) - new Date(a.c.purchaseDate ?? a.c.createdAt)
-  })
+  const withScore = sortCoffeeEntries(
+    list.map((c) => ({ c, score: coffeeScore(c) })),
+    sort,
+  )
+  const activeFilterCount = [roasterId, country, process, status].filter(Boolean).length
+  const sortOptions = [
+    ['date', 'Дата'],
+    ['rating', 'Оцінка ↓'],
+    ['name', 'Назва'],
+    ['roaster', 'Обсмажчик'],
+    ['price', 'Ціна'],
+  ]
 
   return (
     <div>
@@ -61,55 +87,98 @@ export default async function CoffeesPage({ searchParams }) {
         )}
       </div>
 
-      <form className="card" method="get" style={{ marginBottom: 18 }}>
-        <div className="row-3">
-          <div className="field">
-            <label>Пошук</label>
-            <input name="q" defaultValue={sp.q ?? ''} placeholder="назва, регіон, сорт…" />
-          </div>
-          <div className="field">
-            <label>Обсмажчик</label>
-            <select name="roaster" defaultValue={roasterId}>
-              <option value="">усі</option>
-              {roasters.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-          </div>
-          <div className="field">
-            <label>Країна</label>
-            <select name="country" defaultValue={country}>
-              <option value="">усі</option>
-              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div className="field">
-            <label>Обробка</label>
-            <select name="process" defaultValue={process}>
-              <option value="">усі</option>
-              {processes.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-            </select>
-          </div>
-          <div className="field">
-            <label>Статус</label>
-            <select name="status" defaultValue={status}>
-              <option value="">усі</option>
-              <option value="active">активна</option>
-              <option value="finished">завершена</option>
-            </select>
-          </div>
-          <div className="field">
-            <label>Сортування</label>
-            <select name="sort" defaultValue={sort}>
-              <option value="date">за датою</option>
-              <option value="rating">за рейтингом</option>
-              <option value="price">за ціною</option>
-            </select>
-          </div>
-        </div>
-        <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-          <button className="btn btn--secondary btn--sm" type="submit">Застосувати</button>
-          <Link href="/coffees" className="btn btn--ghost btn--sm">Скинути</Link>
-        </div>
-      </form>
+      <div className="coffee-controls">
+        <details className="coffee-control" open={Boolean(query)}>
+          <summary className="btn btn--secondary btn--sm">
+            <span className="coffee-control-icon coffee-control-icon--search" aria-hidden="true" />
+            Пошук
+            {query && <span className="coffee-control-count">1</span>}
+          </summary>
+          <form className="card coffee-control-panel coffee-search-panel" method="get">
+            <input type="hidden" name="roaster" value={roasterId} />
+            <input type="hidden" name="country" value={country} />
+            <input type="hidden" name="process" value={process} />
+            <input type="hidden" name="status" value={status} />
+            <input type="hidden" name="sort" value={sort} />
+            <div className="field">
+              <label htmlFor="coffee-search">Пошук за кавою</label>
+              <input id="coffee-search" name="q" defaultValue={query} placeholder="назва, регіон, сорт…" />
+            </div>
+            <div className="coffee-control-actions">
+              <button className="btn btn--secondary btn--sm" type="submit">Знайти</button>
+              {query && <Link href={coffeeHref({ q: '' })} className="btn btn--ghost btn--sm">Очистити</Link>}
+            </div>
+          </form>
+        </details>
+
+        <details className="coffee-control" open={activeFilterCount > 0}>
+          <summary className="btn btn--secondary btn--sm">
+            <span className="coffee-control-icon coffee-control-icon--filters" aria-hidden="true" />
+            Фільтри
+            {activeFilterCount > 0 && <span className="coffee-control-count">{activeFilterCount}</span>}
+          </summary>
+          <form className="card coffee-control-panel" method="get">
+            <input type="hidden" name="q" value={query} />
+            <input type="hidden" name="sort" value={sort} />
+            <div className="coffee-filter-grid">
+              <div className="field">
+                <label>Обсмажчик</label>
+                <select name="roaster" defaultValue={roasterId}>
+                  <option value="">усі</option>
+                  {roasters.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Країна</label>
+                <select name="country" defaultValue={country}>
+                  <option value="">усі</option>
+                  {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Обробка</label>
+                <select name="process" defaultValue={process}>
+                  <option value="">усі</option>
+                  {processes.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Статус</label>
+                <select name="status" defaultValue={status}>
+                  <option value="">усі</option>
+                  <option value="active">активна</option>
+                  <option value="finished">завершена</option>
+                </select>
+              </div>
+            </div>
+            <div className="coffee-control-actions">
+              <button className="btn btn--secondary btn--sm" type="submit">Застосувати фільтри</button>
+              {activeFilterCount > 0 && (
+                <Link
+                  href={coffeeHref({ roaster: '', country: '', process: '', status: '' })}
+                  className="btn btn--ghost btn--sm"
+                >
+                  Скинути фільтри
+                </Link>
+              )}
+            </div>
+          </form>
+        </details>
+      </div>
+
+      <nav className="coffee-sort" aria-label="Сортування кав">
+        <strong>Сортувати:</strong>
+        {sortOptions.map(([value, label]) => (
+          <Link
+            key={value}
+            href={coffeeHref({ sort: value })}
+            className={`coffee-sort-option${sort === value ? ' coffee-sort-option--active' : ''}`}
+            aria-current={sort === value ? 'page' : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
 
       {withScore.length === 0 ? (
         <p className="empty">Нічого не знайдено.</p>
