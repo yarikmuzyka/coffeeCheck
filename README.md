@@ -1,75 +1,64 @@
-# coffee logger — Coffee Tracker / Brew Journal
+# coffee logger
 
-Веб-сервіс для відстеження specialty кави: журнал покупок, журнал заварювань, оцінки та персональна аналітика смакових вподобань.
+A private coffee journal for tracking beans, roasters, purchases, ratings, and brews.
 
-## Стек
+![coffee logger dashboard](docs/images/dashboard.png)
 
-- **Next.js 15** (App Router, Server Actions)
-- **Prisma** ORM + **PostgreSQL** (Neon / Supabase / Vercel Postgres)
-- **Auth.js** + Google OAuth, ізоляція даних за користувачем
-- Деплой: **Vercel** (безкоштовно) — див. [DEPLOY.md](DEPLOY.md)
+## Features
 
-## Запуск
+- Google OAuth with per-user data isolation
+- Coffee catalog with search, filters, and sorting
+- Roaster and processing-method management
+- Coffee ratings, purchase details, status, and brew journal
+- Dashboard with monthly usage, spending, recent activity, and top roasters
+- Free-plan usage limits enforced on the server
 
-Потрібен Postgres-конект (напр. безкоштовний [Neon](https://neon.tech)).
-Створи `.env` за зразком `.env.example` (Postgres + Google OAuth), тоді:
+## Stack
 
-```bash
-npm install          # встановити залежності + prisma generate
-npm run db:push      # створити таблиці зі схеми
-npm run db:seed      # засідити демо-даними (10 обсмажчиків + приклади)
-npm run dev          # http://localhost:3000
-```
+- Next.js 15 and React 18
+- Auth.js with Google OAuth
+- Prisma and PostgreSQL
+- Vercel deployment
 
-Корисні команди:
+## Local setup
 
-```bash
-npm run db:reset     # перестворити базу + пересідити
-npm run build        # production-білд
-npm run db:claim-owner # одноразово привʼязати старі дані після першого Google-входу
-```
-
-## Версіонування
-
-Версія продукту живе в `package.json` і разом із коротким git SHA білда
-показується у футері кожної сторінки (наприклад, `v0.2.0 · c85f960`) — так
-легко звірити, чи деплой відповідає останньому коміту. Реліз нової версії:
+Requirements: Node.js and PostgreSQL.
 
 ```bash
-npm version minor    # бамп версії + git tag (patch / minor / major)
+cp .env.example .env
+npm install
+npm run db:push
+npm run dev
 ```
 
-## Що вміє MVP
+Open <http://localhost:3000>.
 
-- **Обсмажчики** — CRUD, середня оцінка кожного
-- **Кави** — картка (країна, регіон, сорт, обробка, ціна), список із пошуком, фільтрами (обсмажчик / країна / обробка / статус) і сортуванням (дата / рейтинг / ціна)
-- **Dashboard** — summary-картки (куплено / витрачено) + топи (обсмажчики / країни / обробки / сорти)
-- **Аналітика** — розширені топи + прості рекомендації на основі історії
+Required environment variables:
 
-Оцінка кави = власна оцінка `myScore`; оцінки окремих заварювань зберігаються
-в журналі на сторінці кави.
-
-## Структура
-
-```
-app/
-  dashboard/        головна зі статистикою + графіки
-  coffees/          список + фільтри
-  coffees/new/      форма додавання кави
-  coffees/[id]/     детальна сторінка + заварювання
-  brew-logs/new/    форма заварювання з оцінками
-  roasters/         список обсмажчиків
-  roasters/new/     форма обсмажчика
-  analytics/        розширена аналітика + рекомендації
-lib/
-  prisma.js         клієнт БД
-  auth-options.js   конфігурація Auth.js + Google
-  auth.js           поточний авторизований користувач
-  actions.js        server actions (CRUD)
-  stats.js          обчислення аналітики
-  constants.js      опції для форм
-prisma/
-  schema.prisma     Auth.js + персональні Process / Roaster / Coffee / BrewLog
-  seed.js           демо-дані
+```env
+DATABASE_URL=
+DIRECT_URL=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_SECRET=
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
 ```
 
+Generate `AUTH_SECRET` with:
+
+```bash
+openssl rand -base64 32
+```
+
+## Commands
+
+```bash
+npm test                 # Run tests
+npm run build            # Create a production build
+npm run db:seed          # Add demo data
+npm run db:reset         # Reset and seed the database
+npm run db:claim-owner   # Assign legacy records to a Google account
+```
+
+Deployment instructions: [DEPLOY.md](DEPLOY.md).
