@@ -205,7 +205,7 @@ export default async function CoffeesPage({ searchParams }) {
                   </div>
                 )}
                 <div className="score-pill">
-                  {score != null ? score.toFixed(1) : '—'}<br /><small>/10</small>
+                  {score != null ? score.toFixed(1) : '—'}<br /><small>/5</small>
                 </div>
               </div>
             </Link>

@@ -66,8 +66,8 @@ export function CoffeeForm({ action, roasters, processes, coffee, submitLabel, c
 
       <div className="row" style={{ maxWidth: 420 }}>
         <div className="field">
-          <label>Моя оцінка (з 10)</label>
-          <input type="number" step="0.5" min="0" max="10" name="myScore" defaultValue={coffee?.myScore ?? ''} placeholder="8.5" />
+          <label>Моя оцінка (з 5)</label>
+          <input type="number" step="0.5" min="1" max="5" name="myScore" defaultValue={coffee?.myScore ?? ''} placeholder="4.5" />
         </div>
         <div className="field">
           <label>Оцінка SCA</label>

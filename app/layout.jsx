@@ -42,7 +42,7 @@ const NAV = [
   { href: '/coffees', label: 'Кави' },
   { href: '/roasters', label: 'Обсмажчики' },
   { href: '/plans', label: 'Тарифи' },
-  { href: '/analytics', label: 'Аналітика', disabled: true },
+  { href: '/analytics', label: 'Аналітика' },
 ]
 
 export default async function RootLayout({ children }) {

@@ -865,6 +865,233 @@ a.coffee-row:hover { text-decoration: none; transform: translateY(-2px); border-
   color: color-mix(in srgb, var(--accent) 80%, var(--ink));
 }
 
+/* ---------------- origin analytics ---------------- */
+.analytics-page { padding-top: 8px; }
+.analytics-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.analytics-head h1 { margin: 4px 0 8px; }
+.analytics-head .sub { margin: 0; }
+.analytics-kicker {
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.analytics-period {
+  flex: none;
+  margin-left: auto;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  color: var(--muted);
+  background: var(--card);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.origin-analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(290px, 0.85fr) minmax(400px, 1.25fr);
+  gap: 20px;
+  align-items: start;
+}
+.origin-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.origin-ranking__row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  min-height: 84px;
+  padding: 14px 16px 20px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+}
+.origin-ranking__row:hover {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.origin-ranking__row--active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--card));
+}
+.origin-ranking__index {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--bg-2);
+  color: var(--accent);
+  font-weight: 900;
+}
+.origin-ranking__copy { min-width: 0; }
+.origin-ranking__copy strong,
+.origin-ranking__copy small { display: block; }
+.origin-ranking__copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.origin-ranking__copy small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.origin-ranking__row > b {
+  color: var(--accent);
+  font-size: 1.45rem;
+  font-variant-numeric: tabular-nums;
+}
+.origin-ranking__meter {
+  position: absolute;
+  right: 16px;
+  bottom: 9px;
+  left: 64px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bg-2);
+}
+.origin-ranking__meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+.origin-detail {
+  padding: 24px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+}
+.origin-detail__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.origin-detail__head span,
+.origin-detail__label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.origin-detail__head h2 { margin: 5px 0 0; font-size: 1.9rem; }
+.origin-detail__score { flex: none; text-align: right; }
+.origin-detail__score strong,
+.origin-detail__score small { display: block; }
+.origin-detail__score strong {
+  color: var(--accent);
+  font-size: 2.35rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.origin-detail__score small { margin-top: 5px; color: var(--muted); font-size: 0.72rem; }
+.origin-regions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0 22px;
+}
+.origin-regions > div {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--bg-2);
+}
+.origin-regions strong,
+.origin-regions small { display: block; }
+.origin-regions strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.origin-regions small { margin-top: 5px; color: var(--muted); font-size: 0.7rem; }
+.origin-detail__label { margin: 0 0 8px; }
+.origin-winner {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 15px;
+  border-radius: 15px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.origin-winner:hover { color: var(--on-accent); text-decoration: none; transform: translateY(-1px); }
+.origin-winner__mark {
+  display: grid;
+  place-items: center;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(20, 9, 2, 0.12);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+.origin-winner span:nth-child(2) { min-width: 0; }
+.origin-winner strong,
+.origin-winner small { display: block; }
+.origin-winner strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.origin-winner small {
+  overflow: hidden;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.76;
+}
+.origin-winner > b { font-size: 1.65rem; font-variant-numeric: tabular-nums; }
+.origin-insight {
+  margin: 18px 0 0;
+  padding-left: 13px;
+  border-left: 3px solid var(--good);
+  line-height: 1.55;
+}
+.origin-detail__empty {
+  padding: 18px;
+  border-radius: 15px;
+  background: var(--bg-2);
+  color: var(--muted);
+}
+.analytics-empty { max-width: 680px; }
+.analytics-empty h2 { margin-top: 0; }
+.analytics-empty .btn { margin-top: 8px; }
+@media (max-width: 820px) {
+  .origin-analytics-grid { grid-template-columns: 1fr; }
+  .origin-ranking { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .analytics-head { flex-direction: column; }
+  .analytics-period { margin-left: 0; }
+  .origin-ranking { grid-template-columns: 1fr; }
+  .origin-detail { padding: 18px; }
+  .origin-regions { grid-template-columns: 1fr; }
+}
+
 /* ---------------- plan usage ---------------- */
 .header-usage { position: relative; margin-left: auto; }
 .header-usage-summary {

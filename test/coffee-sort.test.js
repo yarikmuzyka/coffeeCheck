@@ -9,8 +9,8 @@ function entry(name, { score = null, roaster = null } = {}) {
 test('sorts coffees by score descending and leaves unrated coffees last', () => {
   const result = sortCoffeeEntries([
     entry('Без оцінки'),
-    entry('Вища', { score: 9 }),
-    entry('Нижча', { score: 7 }),
+    entry('Вища', { score: 4.5 }),
+    entry('Нижча', { score: 3.5 }),
   ], 'rating')
 
   assert.deepEqual(result.map(({ c }) => c.name), ['Вища', 'Нижча', 'Без оцінки'])

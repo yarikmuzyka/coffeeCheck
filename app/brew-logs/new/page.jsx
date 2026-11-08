@@ -88,12 +88,12 @@ export default async function NewBrewLogPage({ searchParams }) {
         </fieldset>
 
         <fieldset>
-          <legend>Оцінка (1–10)</legend>
+          <legend>Оцінка (1–5)</legend>
           <div className="scores">
             {SCORE_FIELDS.map((f) => (
               <div key={f.key} className="field score-field">
                 <label>{f.label}</label>
-                <input type="number" min="1" max="10" name={f.key} />
+                <input type="number" min="1" max="5" name={f.key} />
               </div>
             ))}
           </div>

@@ -71,7 +71,7 @@ export default async function CoffeeDetailPage({ params }) {
             </form>
           </div>
           <div className="score-pill score-pill--detail">
-            {score != null ? score.toFixed(1) : '—'}<br /><small>моя оцінка /10</small>
+            {score != null ? score.toFixed(1) : '—'}<br /><small>моя оцінка /5</small>
           </div>
         </div>
       </header>
@@ -143,7 +143,7 @@ export default async function CoffeeDetailPage({ params }) {
                     </div>
                     <div className="spacer" />
                     <div className="score-pill">
-                      {log.overallScore ?? '—'}<br /><small>/10</small>
+                      {log.overallScore ?? '—'}<br /><small>/5</small>
                     </div>
                   </div>
                   {log.perceivedNotes && <p><strong>Ноти:</strong> {log.perceivedNotes}</p>}

@@ -3,15 +3,15 @@ import assert from 'node:assert/strict'
 import { optionalDate, optionalNumber } from '../lib/form-values.js'
 
 test('optionalNumber accepts empty and in-range numeric values', () => {
-  assert.equal(optionalNumber('', 'Оцінка', { min: 0, max: 10 }), null)
-  assert.equal(optionalNumber('8.5', 'Оцінка', { min: 0, max: 10 }), 8.5)
+  assert.equal(optionalNumber('', 'Оцінка', { min: 1, max: 5 }), null)
+  assert.equal(optionalNumber('4.5', 'Оцінка', { min: 1, max: 5 }), 4.5)
   assert.equal(optionalNumber('180', 'Час', { min: 1, max: 86400, integer: true }), 180)
 })
 
 test('optionalNumber rejects invalid, fractional integer, and out-of-range values', () => {
-  assert.throws(() => optionalNumber('abc', 'Оцінка', { min: 0, max: 10 }))
+  assert.throws(() => optionalNumber('abc', 'Оцінка', { min: 1, max: 5 }))
   assert.throws(() => optionalNumber('1.5', 'Час', { min: 1, max: 100, integer: true }))
-  assert.throws(() => optionalNumber('11', 'Оцінка', { min: 0, max: 10 }))
+  assert.throws(() => optionalNumber('6', 'Оцінка', { min: 1, max: 5 }))
 })
 
 test('optionalDate validates supplied dates', () => {

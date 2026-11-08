@@ -1,106 +1,143 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
-import { computeDashboard, coffeeScore } from '../../lib/stats.js'
+import { computeOriginInsights, coffeeScore } from '../../lib/stats.js'
+import { pluralizeUk } from '../../lib/format.js'
 import { requireUser } from '../../lib/auth.js'
 
 export const dynamic = 'force-dynamic'
 
-// Прості рекомендації на основі історії (як у брифі)
-function buildRecommendations(coffees, s) {
-  const recs = []
-
-  // Обсмажчик стабільно 8+
-  for (const g of s.topRoasters) {
-    if (g.avg != null && g.avg >= 8 && g.count >= 2) {
-      recs.push({ type: 'good', text: `Обсмажчик «${g.key}» стабільно тримає ${g.avg.toFixed(1)}/10 (${g.count} кав) — бери сміливо.` })
-    }
-  }
-  // Найкраща зв'язка країна+обробка
-  const combo = new Map()
-  for (const c of coffees) {
-    const score = coffeeScore(c)
-    if (score == null || !c.originCountry || !c.process) continue
-    const key = `${c.process} ${c.originCountry}`
-    if (!combo.has(key)) combo.set(key, [])
-    combo.get(key).push(score)
-  }
-  const comboRanked = [...combo.entries()]
-    .map(([k, v]) => ({ k, avg: v.reduce((a, b) => a + b, 0) / v.length, n: v.length }))
-    .sort((a, b) => b.avg - a.avg)
-  if (comboRanked[0] && comboRanked[0].avg >= 8) {
-    recs.push({ type: 'good', text: `Тобі заходить ${comboRanked[0].k} (${comboRanked[0].avg.toFixed(1)}/10) — шукай схожі лоти.` })
-  }
-  // Обробка з низькими оцінками
-  const weakProcess = [...s.topProcesses].reverse().find((g) => g.avg != null && g.avg < 6 && g.count >= 2)
-  if (weakProcess) {
-    recs.push({ type: 'warn', text: `Обробка «${weakProcess.key}» дає в середньому лише ${weakProcess.avg.toFixed(1)}/10 — можливо, це не твоє.` })
-  }
-  return recs
+function formatScore(value) {
+  return value == null ? '—' : value.toFixed(1)
 }
 
-function FullTop({ title, items, unit = '/10' }) {
+function originHref(country) {
+  return `/analytics?country=${encodeURIComponent(country)}`
+}
+
+function OriginRanking({ origins, selectedKey }) {
   return (
-    <div className="card">
-      <h2 style={{ marginTop: 0 }}>{title}</h2>
-      {items.length === 0 ? (
-        <p className="empty" style={{ padding: '12px 0' }}>Немає даних</p>
-      ) : (
-        <ul className="toplist">
-          {items.map((g) => (
-            <li key={g.key}>
-              <span className="k">{g.key}<span className="cnt">×{g.count}</span></span>
-              <span className="v">{g.avg != null ? g.avg.toFixed(1) : '—'}{g.avg != null ? unit : ''}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <ol className="origin-ranking" aria-label="Рейтинг країн">
+      {origins.map((origin, index) => {
+        const isSelected = origin.key === selectedKey
+        const width = origin.avg == null ? 0 : Math.round((origin.avg / 5) * 100)
+
+        return (
+          <li key={origin.key}>
+            <Link
+              href={originHref(origin.key)}
+              className={`origin-ranking__row${isSelected ? ' origin-ranking__row--active' : ''}`}
+              aria-current={isSelected ? 'true' : undefined}
+            >
+              <span className="origin-ranking__index">{index + 1}</span>
+              <span className="origin-ranking__copy">
+                <strong>{origin.key}</strong>
+                <small>
+                  {origin.count} {pluralizeUk(origin.count, ['кава', 'кави', 'кав'])}
+                  {' · '}{origin.regions.length} {pluralizeUk(origin.regions.length, ['регіон', 'регіони', 'регіонів'])}
+                </small>
+              </span>
+              <b>{formatScore(origin.avg)}</b>
+              <span className="origin-ranking__meter" aria-hidden="true">
+                <i style={{ width: `${width}%` }} />
+              </span>
+            </Link>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 
-export default async function AnalyticsPage() {
+function OriginDetail({ origin }) {
+  const topRegion = origin.regions.find((region) => region.avg != null)
+  const topCoffee = origin.topCoffee
+
+  return (
+    <section className="origin-detail" aria-label={`Деталі про ${origin.key}`}>
+      <header className="origin-detail__head">
+        <div>
+          <span>Лідер за твоїми оцінками</span>
+          <h2>{origin.key}</h2>
+        </div>
+        <div className="origin-detail__score">
+          <strong>{formatScore(origin.avg)}</strong>
+          <small>/5 середня</small>
+        </div>
+      </header>
+
+      <div className="origin-regions" aria-label="Регіони">
+        {origin.regions.slice(0, 3).map((region) => (
+          <div key={region.key}>
+            <strong>{region.key}</strong>
+            <small>
+              {formatScore(region.avg)} /5 · {region.count}{' '}
+              {pluralizeUk(region.count, ['кава', 'кави', 'кав'])}
+            </small>
+          </div>
+        ))}
+      </div>
+
+      <p className="origin-detail__label">Твоя найкраща кава звідси</p>
+      {topCoffee ? (
+        <Link href={`/coffees/${topCoffee.id}`} className="origin-winner">
+          <span className="origin-winner__mark">TOP</span>
+          <span>
+            <strong>{topCoffee.name}</strong>
+            <small>
+              {[topCoffee.roaster?.name, topCoffee.region, topCoffee.process].filter(Boolean).join(' · ')}
+            </small>
+          </span>
+          <b>{formatScore(coffeeScore(topCoffee))}</b>
+        </Link>
+      ) : (
+        <div className="origin-detail__empty">Додай оцінку, щоб побачити фаворита.</div>
+      )}
+
+      {topRegion && (
+        <p className="origin-insight">
+          Найбільше тобі заходить <strong>{topRegion.key}</strong>:
+          {' '}середня оцінка <strong>{formatScore(topRegion.avg)}/5</strong> на основі{' '}
+          {topRegion.ratedCount} {pluralizeUk(topRegion.ratedCount, ['оцінки', 'оцінок', 'оцінок'])}.
+        </p>
+      )}
+    </section>
+  )
+}
+
+export default async function AnalyticsPage({ searchParams }) {
   const user = await requireUser()
+  const params = await searchParams
   const coffees = await prisma.coffee.findMany({
     where: { userId: user.id },
     include: { roaster: true },
   })
-  const s = computeDashboard(coffees)
-  const recs = buildRecommendations(coffees, s)
+  const origins = computeOriginInsights(coffees)
+  const requestedCountry = params?.country
+  const selectedOrigin = origins.find((origin) => origin.key === requestedCountry) ?? origins[0]
 
   return (
-    <div>
-      <div className="page-head">
-        <h1>Аналітика</h1>
-        <p className="sub">Що саме тобі подобається у каві</p>
-      </div>
+    <div className="analytics-page">
+      <header className="analytics-head">
+        <div>
+          <span className="analytics-kicker">Аналітика смаку</span>
+          <h1>Що тобі заходить найбільше</h1>
+          <p className="sub">Країни, регіони та найкращі лоти за твоїми оцінками</p>
+        </div>
+        <span className="analytics-period">Увесь час</span>
+      </header>
 
-      <h2>Рекомендації</h2>
-      {recs.length === 0 ? (
-        <div className="card"><p className="empty" style={{ padding: '12px 0' }}>
-          Додай більше кав зі своєю оцінкою, щоб зʼявились рекомендації.
-        </p></div>
+      {origins.length === 0 ? (
+        <div className="card analytics-empty">
+          <h2>Ще немає даних про походження</h2>
+          <p>Додай країну та регіон у картках кави.</p>
+          <Link href="/coffees" className="btn btn--primary">Перейти до кав</Link>
+        </div>
       ) : (
-        <div className="card">
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            {recs.map((r, i) => (
-              <li key={i} style={{ marginBottom: 6, color: r.type === 'warn' ? 'var(--bad)' : r.type === 'value' ? 'var(--good)' : 'var(--ink)' }}>
-                {r.text}
-              </li>
-            ))}
-          </ul>
+        <div className="origin-analytics-grid">
+          <OriginRanking origins={origins} selectedKey={selectedOrigin.key} />
+          <OriginDetail origin={selectedOrigin} />
         </div>
       )}
-
-      <div className="cols" style={{ marginTop: 12 }}>
-        <FullTop title="Обсмажчики за оцінкою" items={s.topRoasters} />
-        <FullTop title="Країни за оцінкою" items={s.topCountries} />
-        <FullTop title="Обробки за оцінкою" items={s.topProcesses} />
-        <FullTop title="Сорти за оцінкою" items={s.topVarieties} />
-      </div>
-
-      <p style={{ marginTop: 24 }}>
-        <Link href="/dashboard">← Назад до dashboard</Link>
-      </p>
     </div>
   )
 }
