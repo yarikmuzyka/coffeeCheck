@@ -893,6 +893,27 @@ a.coffee-row:hover { text-decoration: none; transform: translateY(-2px); border-
   font-size: 0.82rem;
   font-weight: 800;
 }
+.analytics-tabs {
+  display: inline-flex;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 5px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+.analytics-tabs a {
+  padding: 9px 16px;
+  border-radius: 11px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+.analytics-tabs a:hover { color: var(--ink); text-decoration: none; }
+.analytics-tabs .analytics-tabs__active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
 .origin-analytics-grid {
   display: grid;
   grid-template-columns: minmax(290px, 0.85fr) minmax(400px, 1.25fr);

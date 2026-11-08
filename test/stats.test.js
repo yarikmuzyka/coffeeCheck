@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { averageMonthlyWeightGrams, computeDashboard, computeOriginInsights } from '../lib/stats.js'
+import {
+  averageMonthlyWeightGrams,
+  computeDashboard,
+  computeOriginInsights,
+  computeProcessInsights,
+} from '../lib/stats.js'
 
 test('current-month summary includes a coffee purchased earlier in the same month', () => {
   const coffees = [{
@@ -57,4 +62,20 @@ test('origin insights keep unrated countries after rated ones', () => {
 
   assert.deepEqual(origins.map((origin) => origin.key), ['Kenya', 'Brazil'])
   assert.equal(origins[1].avg, null)
+})
+
+test('process insights rank exact processing methods and their best countries', () => {
+  const coffees = [
+    { id: 'natural-colombia', name: 'Natural Colombia', process: 'natural', originCountry: 'Colombia', myScore: 4.5 },
+    { id: 'natural-ethiopia', name: 'Natural Ethiopia', process: 'natural', originCountry: 'Ethiopia', myScore: 4 },
+    { id: 'thermal', name: 'Thermal Shock', process: 'natural thermal shock', originCountry: 'Colombia', myScore: 5 },
+    { id: 'washed', name: 'Washed Kenya', process: 'washed', originCountry: 'Kenya', myScore: 3.5 },
+  ]
+
+  const processes = computeProcessInsights(coffees)
+
+  assert.deepEqual(processes.map((process) => process.key), ['natural thermal shock', 'natural', 'washed'])
+  assert.equal(processes[0].topCoffee.id, 'thermal')
+  assert.equal(processes[1].countries[0].key, 'Colombia')
+  assert.equal(processes[1].avg, 4.25)
 })
