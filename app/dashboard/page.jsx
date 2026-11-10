@@ -1,179 +1,205 @@
 import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
-import { averageMonthlyWeightGrams, computeDashboard, coffeeScore } from '../../lib/stats.js'
+import { averageMonthlyWeightGrams, coffeeScore, computeHomeSummary, computeTasteLeaders } from '../../lib/stats.js'
 import { formatWeightGrams, pluralizeUk } from '../../lib/format.js'
 import { requireUser } from '../../lib/auth.js'
-import { COFFEE_PROCESSES_INCLUDE } from '../../lib/coffee-processes.js'
+import { COFFEE_PROCESSES_INCLUDE, coffeeProcessLabel } from '../../lib/coffee-processes.js'
+import { newLotCutoff } from '../../lib/new-lot-feed.js'
 
 export const dynamic = 'force-dynamic'
 
-function formatDate(value) {
-  return new Date(value).toLocaleDateString('uk', { day: 'numeric', month: 'short', year: 'numeric' })
+const OPEN_COFFEES_LIMIT = 5
+const NEW_LOTS_LIMIT = 3
+
+function formatScore(value) {
+  return value == null ? '—' : value.toFixed(1)
 }
 
-function KpiCard({ value, label, context }) {
+function formatMoney(value) {
+  return `${new Intl.NumberFormat('uk-UA').format(value)} ₴`
+}
+
+function firstName(name) {
+  return (name ?? '').trim().split(/\s+/)[0] || null
+}
+
+function StatTile({ value, label }) {
   return (
-    <div className="dashboard-kpi">
-      <span className="dashboard-kpi__value">{value}</span>
-      <span className="dashboard-kpi__copy">
-        <strong>{label}</strong>
-        <small>{context}</small>
-      </span>
+    <div className="home-stat">
+      <strong>{value}</strong>
+      <span>{label}</span>
     </div>
   )
 }
 
-function CoffeeRow({ coffee }) {
+function OpenCoffeeRow({ coffee }) {
   const score = coffeeScore(coffee)
+  const meta = [coffee.roaster?.name, coffeeProcessLabel(coffee), coffee.price != null ? `${coffee.price} ₴` : null]
+    .filter(Boolean).join(' · ')
 
   return (
-    <Link href={`/coffees/${coffee.id}`} className="dashboard-coffee-row">
-      <span className="dashboard-coffee-row__copy">
+    <li className="home-row">
+      <Link href={`/coffees/${coffee.id}`} className="home-row__main">
         <strong>{coffee.name}</strong>
-        <small>
-          {[coffee.roaster?.name, coffee.originCountry, coffee.price != null ? `${coffee.price} ₴` : null]
-            .filter(Boolean).join(' · ')}
-        </small>
-      </span>
-      <span className={`dashboard-coffee-score${score == null ? ' dashboard-coffee-score--empty' : ''}`}>
-        {score != null ? score.toFixed(1) : '—'}
-      </span>
+        <small>{meta}</small>
+      </Link>
+      <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="home-icon" title="Додати заварювання">
+        <span aria-hidden="true">☕</span>
+        <span className="sr-only">Додати заварювання для {coffee.name}</span>
+      </Link>
+      {score != null ? (
+        <span className="home-score" title="Моя оцінка">{formatScore(score)}</span>
+      ) : (
+        <Link href={`/coffees/${coffee.id}/edit`} className="home-score home-score--empty">Оцінити</Link>
+      )}
+    </li>
+  )
+}
+
+function TasteTile({ label, leader, href }) {
+  if (!leader) {
+    return (
+      <div className="home-taste home-taste--empty">
+        <small>{label}</small>
+        <strong>—</strong>
+      </div>
+    )
+  }
+  return (
+    <Link href={href} className="home-taste">
+      <small>{label}</small>
+      <strong title={leader.key}>{leader.key}</strong>
+      <b>{formatScore(leader.avg)}</b>
     </Link>
   )
 }
 
 export default async function DashboardPage() {
   const user = await requireUser()
-  const coffees = await prisma.coffee.findMany({
-    where: { userId: user.id },
-    include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
-  })
-  const stats = computeDashboard(coffees)
-  const averageMonthlyWeight = averageMonthlyWeightGrams(coffees)
-  const activeCount = coffees.filter((coffee) => !coffee.isFinished).length
-  const recentCoffees = [...coffees]
-    .sort((a, b) => new Date(b.purchaseDate ?? b.createdAt) - new Date(a.purchaseDate ?? a.createdAt))
-    .slice(0, 3)
-  const latestAdded = [...coffees]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 3)
+  const lotWindow = { isAvailable: true, firstSeenAt: { gte: newLotCutoff() } }
+  const [coffees, newLots, newLotCount, wishedCount] = await Promise.all([
+    prisma.coffee.findMany({
+      where: { userId: user.id },
+      include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
+    }),
+    prisma.externalLot.findMany({ where: lotWindow, orderBy: { firstSeenAt: 'desc' }, take: 40 }),
+    prisma.externalLot.count({ where: lotWindow }),
+    prisma.wishedLot.count({ where: { userId: user.id } }),
+  ])
+
+  const summary = computeHomeSummary(coffees)
+  const taste = computeTasteLeaders(coffees)
+  const monthlyWeight = averageMonthlyWeightGrams(coffees)
+  const roasterId = taste.roaster ? coffees.find((coffee) => coffee.roaster?.name === taste.roaster.key)?.roasterId : null
+  // Неоцінені кави — першими, щоб підказка «Оцінити» була на виду.
+  const openCoffees = [
+    ...summary.openCoffees.filter((coffee) => coffeeScore(coffee) == null),
+    ...summary.openCoffees.filter((coffee) => coffeeScore(coffee) != null),
+  ].slice(0, OPEN_COFFEES_LIMIT)
+  // Лоти з міткою магазину — першими, далі найсвіжіші.
+  const featuredLots = [...newLots]
+    .sort((a, b) => Number(Boolean(b.sourceBadge)) - Number(Boolean(a.sourceBadge)))
+    .slice(0, NEW_LOTS_LIMIT)
+
+  const name = firstName(user.name)
+  const nudges = [
+    summary.unratedOpenCount > 0
+      ? `${summary.unratedOpenCount} ${pluralizeUk(summary.unratedOpenCount, ['кава чекає', 'кави чекають', 'кав чекають'])} на оцінку`
+      : null,
+    newLotCount > 0 ? `${newLotCount} ${pluralizeUk(newLotCount, ['новий лот', 'нові лоти', 'нових лотів'])}` : null,
+  ].filter(Boolean)
 
   return (
-    <div className="dashboard-page">
-      <header className="dashboard-head">
+    <div className="home-page">
+      <header className="home-head">
         <div>
-          <h1>Твоя кава — з першого погляду</h1>
-          <p className="sub">Колекція, витрати та останні записи в одному місці</p>
+          <h1>{name ? `Привіт, ${name}` : 'Привіт'}</h1>
+          <p className="sub">{nudges.length ? nudges.join(' · ') : 'Колекція, покупки та твій смак в одному місці'}</p>
         </div>
-        <div className="spacer" />
-        <Link href="/coffees/new" className="btn btn--primary">+ Додати каву</Link>
+        <div className="home-head__actions">
+          <Link href="/brew-logs/new" className="btn btn--secondary btn--sm">+ Заварювання</Link>
+          <Link href="/coffees/new" className="btn btn--primary btn--sm">+ Кава</Link>
+        </div>
       </header>
 
-      <section className="dashboard-kpi-grid" aria-label="Коротка статистика">
-        <KpiCard
-          value={stats.totalCoffees}
-          label={`${pluralizeUk(stats.totalCoffees, ['кава', 'кави', 'кав'])} у колекції`}
-          context={`${activeCount} ${pluralizeUk(activeCount, ['активна пачка', 'активні пачки', 'активних пачок'])}`}
+      <section className="home-stats" aria-label="Коротка статистика">
+        <StatTile
+          value={summary.totalCoffees}
+          label={`${pluralizeUk(summary.totalCoffees, ['кава', 'кави', 'кав'])} · ${summary.openCount} ${pluralizeUk(summary.openCount, ['відкрита', 'відкриті', 'відкритих'])}`}
         />
-        <KpiCard
-          value={formatWeightGrams(averageMonthlyWeight)}
-          label="Середній розхід"
-          context="кави на місяць"
+        <StatTile value={formatWeightGrams(monthlyWeight)} label="розхід на місяць" />
+        <StatTile
+          value={summary.recentCount > 0 ? `${summary.recentCount} · ${formatMoney(summary.recentSpent)}` : '0'}
+          label={`${pluralizeUk(summary.recentCount, ['пачка', 'пачки', 'пачок'])} за ${summary.recentDays} днів`}
         />
-        <KpiCard
-          value={stats.monthCoffees}
-          label="Кави цього місяця"
-          context={`${stats.monthSpent} ₴ витрачено`}
-        />
+        <StatTile value={formatScore(summary.averageScore)} label="середня оцінка" />
       </section>
 
-      <div className="dashboard-overview-grid">
-        <section className="dashboard-activity">
-          <div className="dashboard-section-head">
-            <h2>Остання активність</h2>
+      <div className="home-grid">
+        <section className="home-card" aria-labelledby="home-open">
+          <div className="home-card__head">
+            <h2 id="home-open">Зараз відкриті</h2>
+            <Link href="/coffees?status=active">Уся колекція →</Link>
           </div>
-          {latestAdded.length === 0 ? (
-            <div className="dashboard-empty">Додай першу каву, і вона з’явиться тут.</div>
+          {openCoffees.length === 0 ? (
+            <p className="home-empty">
+              Немає відкритих пачок. <Link href="/coffees/new">Додай каву →</Link>
+            </p>
           ) : (
-            <ol className="dashboard-timeline">
-              {latestAdded.map((coffee) => (
-                <li key={coffee.id}>
-                  <span className="dashboard-timeline__mark" aria-hidden="true">+</span>
-                  <div>
-                    <strong>Додано {coffee.name}</strong>
-                    <p>
-                      {[coffee.roaster?.name, coffee.price != null ? `${coffee.price} ₴` : null,
-                        coffeeScore(coffee) != null ? `оцінка ${coffeeScore(coffee).toFixed(1)}` : null]
-                        .filter(Boolean).join(' · ')}
-                    </p>
-                    <time dateTime={new Date(coffee.createdAt).toISOString()}>{formatDate(coffee.createdAt)}</time>
-                  </div>
+            <ul className="home-list">
+              {openCoffees.map((coffee) => <OpenCoffeeRow key={coffee.id} coffee={coffee} />)}
+            </ul>
+          )}
+        </section>
+
+        <section className="home-card" aria-labelledby="home-lots">
+          <div className="home-card__head">
+            <h2 id="home-lots">Нові лоти</h2>
+            <Link href="/new-lots">{newLotCount > 0 ? `Усі ${newLotCount} →` : 'Відкрити →'}</Link>
+          </div>
+          {featuredLots.length === 0 ? (
+            <p className="home-empty">Нових лотів поки немає — оновлення раз на два дні.</p>
+          ) : (
+            <ul className="home-list">
+              {featuredLots.map((lot) => (
+                <li key={lot.id} className="home-row">
+                  <a href={lot.productUrl} target="_blank" rel="noreferrer" className="home-row__main">
+                    <strong>{lot.name}</strong>
+                    <small>{[lot.roasterName, lot.price != null ? formatMoney(lot.price) : null].filter(Boolean).join(' · ')}</small>
+                  </a>
+                  {lot.sourceBadge && <span className="home-tag">{lot.sourceBadge}</span>}
                 </li>
               ))}
-            </ol>
+            </ul>
           )}
-        </section>
-
-        <section className="dashboard-month">
-          <span className="dashboard-month__label">Цей місяць</span>
-          <strong>
-            {stats.monthCoffees} {pluralizeUk(stats.monthCoffees, ['пачка', 'пачки', 'пачок'])}
-          </strong>
-          <div className="dashboard-month__row">
-            <span>Вага</span>
-            <b>{formatWeightGrams(stats.monthWeightGrams)}</b>
-          </div>
-          <div className="dashboard-month__row">
-            <span>Витрачено</span>
-            <b>{stats.monthSpent} ₴</b>
-          </div>
-          <div className="dashboard-month__row">
-            <span>Середня ціна</span>
-            <b>{stats.monthCoffees ? Math.round(stats.monthSpent / stats.monthCoffees) : 0} ₴</b>
-          </div>
+          <Link href="/new-lots?tab=wish" className="home-card__foot">
+            <span aria-hidden="true">♡</span> Хочу спробувати: {wishedCount}
+          </Link>
         </section>
       </div>
 
-      <div className="dashboard-content-grid">
-        <section>
-          <div className="dashboard-section-head">
-            <h2>Останні кави</h2>
-            <div className="spacer" />
-            <Link href="/coffees">Уся колекція →</Link>
-          </div>
-          {recentCoffees.length === 0 ? (
-            <div className="dashboard-empty">У колекції ще немає кав.</div>
-          ) : (
-            <div className="dashboard-coffee-list">
-              {recentCoffees.map((coffee) => <CoffeeRow key={coffee.id} coffee={coffee} />)}
-            </div>
-          )}
-        </section>
-
-        <section>
-          <div className="dashboard-section-head">
-            <h2>Найкращі обсмажчики</h2>
-          </div>
-          <div className="card dashboard-roasters">
-            {stats.topRoasters.length === 0 ? (
-              <p className="dashboard-empty dashboard-empty--compact">Ще немає даних.</p>
-            ) : (
-              <ol>
-                {stats.topRoasters.slice(0, 3).map((roaster, index) => (
-                  <li key={roaster.key}>
-                    <span className="dashboard-roasters__index">{index + 1}</span>
-                    <span className="dashboard-roasters__copy">
-                      <strong>{roaster.key}</strong>
-                      <small>{roaster.count} {pluralizeUk(roaster.count, ['кава', 'кави', 'кав'])}</small>
-                    </span>
-                    <b>{roaster.avg != null ? roaster.avg.toFixed(1) : '—'}</b>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        </section>
-      </div>
+      <section aria-labelledby="home-taste">
+        <h2 id="home-taste" className="home-section-title">
+          Твій смак <small>за твоїми оцінками</small>
+        </h2>
+        <div className="home-taste-grid">
+          <TasteTile
+            label="Обсмажчик"
+            leader={taste.roaster}
+            href={roasterId ? `/coffees?roaster=${encodeURIComponent(roasterId)}` : '/coffees'}
+          />
+          <TasteTile
+            label="Країна"
+            leader={taste.country}
+            href={taste.country ? `/analytics?country=${encodeURIComponent(taste.country.key)}` : '/analytics'}
+          />
+          <TasteTile
+            label="Обробка"
+            leader={taste.process}
+            href={taste.process ? `/analytics?view=process&process=${encodeURIComponent(taste.process.key)}` : '/analytics?view=process'}
+          />
+        </div>
+      </section>
     </div>
   )
 }
