@@ -4,6 +4,7 @@ import { coffeeScore } from '../../lib/stats.js'
 import { requireUser } from '../../lib/auth.js'
 import { getUsageSnapshot } from '../../lib/entitlements.js'
 import { sortCoffeeEntries } from '../../lib/coffee-sort.js'
+import { COFFEE_PROCESSES_INCLUDE, coffeeHasProcess, coffeeProcessLabel } from '../../lib/coffee-processes.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,7 +38,7 @@ export default async function CoffeesPage({ searchParams }) {
   }
 
   const [allCoffees, roasters, processes, usage] = await Promise.all([
-    prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true } }),
+    prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE } }),
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     getUsageSnapshot(prisma, user.id),
@@ -48,7 +49,7 @@ export default async function CoffeesPage({ searchParams }) {
   let list = allCoffees.filter((c) => {
     if (roasterId && c.roasterId !== roasterId) return false
     if (country && c.originCountry !== country) return false
-    if (process && c.process !== process) return false
+    if (process && !coffeeHasProcess(c, process)) return false
     if (status === 'active' && c.isFinished) return false
     if (status === 'finished' && !c.isFinished) return false
     if (q) {
@@ -193,7 +194,7 @@ export default async function CoffeesPage({ searchParams }) {
                   {c.isFinished && <span className="badge badge--finished">завершена</span>}
                 </h3>
                 <p className="meta">
-                  {[c.roaster?.name, c.originCountry, c.variety, c.process]
+                  {[c.roaster?.name, c.originCountry, c.variety, coffeeProcessLabel(c)]
                     .filter(Boolean).join(' · ')}
                   {c.price ? ` · ${c.price} ₴` : ''}
                 </p>

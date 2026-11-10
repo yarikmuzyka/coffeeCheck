@@ -8,6 +8,7 @@ A private coffee journal for tracking beans, roasters, purchases, ratings, and b
 
 - Google OAuth with per-user data isolation
 - Coffee catalog with search, filters, and sorting
+- New filter-coffee lots feed with a personal try list
 - Roaster and processing-method management
 - Coffee ratings, purchase details, status, and brew journal
 - Dashboard with monthly usage, spending, recent activity, and top roasters
@@ -43,6 +44,7 @@ AUTH_GOOGLE_SECRET=
 AUTH_SECRET=
 AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
+CRON_SECRET=
 ```
 
 Generate `AUTH_SECRET` with:

@@ -11,7 +11,11 @@ export default async function RoastersPage() {
   const user = await requireUser()
   const [roasters, processes, usage] = await Promise.all([
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
-    prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
+    prisma.process.findMany({
+      where: { userId: user.id },
+      orderBy: { name: 'asc' },
+      include: { _count: { select: { coffees: true } } },
+    }),
     getUsageSnapshot(prisma, user.id),
   ])
 
@@ -73,7 +77,14 @@ export default async function RoastersPage() {
             <div className="coffee-list catalog-list">
               {processes.map((p) => (
                 <div key={p.id} className="card coffee-row">
-                  <h3>{p.name}</h3>
+                  <div>
+                    <h3>{p.name}</h3>
+                    <p className="meta">
+                      {p._count.coffees > 0 ? `Кав: ${p._count.coffees}` : 'Ще не використовується'}
+                    </p>
+                  </div>
+                  <div className="catalog-row-actions">
+                  <Link href={`/processes/${p.id}/edit`} className="btn btn--ghost btn--sm" title="Перейменувати">✎</Link>
                   <form action={deleteProcess}>
                     <input type="hidden" name="id" value={p.id} />
                     <ConfirmSubmitButton
@@ -84,6 +95,7 @@ export default async function RoastersPage() {
                       ✕
                     </ConfirmSubmitButton>
                   </form>
+                  </div>
                 </div>
               ))}
             </div>

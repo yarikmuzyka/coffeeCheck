@@ -38,6 +38,7 @@ npm run db:seed           # (опційно) залити демо-обсмаж�
    - `AUTH_GOOGLE_SECRET` = OAuth Client Secret
    - `AUTH_SECRET` = випадковий секрет (`openssl rand -base64 32`)
    - `AUTH_URL` = production URL застосунку
+   - `CRON_SECRET` = окремий випадковий секрет (`openssl rand -base64 32`)
 5. **Deploy**.
 
 У Google Cloud Console створи OAuth client типу **Web application** і додай callback:

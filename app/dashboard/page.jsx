@@ -3,6 +3,7 @@ import { prisma } from '../../lib/prisma.js'
 import { averageMonthlyWeightGrams, computeDashboard, coffeeScore } from '../../lib/stats.js'
 import { formatWeightGrams, pluralizeUk } from '../../lib/format.js'
 import { requireUser } from '../../lib/auth.js'
+import { COFFEE_PROCESSES_INCLUDE } from '../../lib/coffee-processes.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
   const user = await requireUser()
   const coffees = await prisma.coffee.findMany({
     where: { userId: user.id },
-    include: { roaster: true },
+    include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
   })
   const stats = computeDashboard(coffees)
   const averageMonthlyWeight = averageMonthlyWeightGrams(coffees)
