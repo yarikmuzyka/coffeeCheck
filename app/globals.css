@@ -746,6 +746,14 @@ a.coffee-row:hover { text-decoration: none; transform: translateY(-2px); border-
 .catalog-section-head h2 { margin: 0; font-size: 1.1rem; white-space: nowrap; }
 .catalog-total { color: var(--muted); font-size: 0.82rem; font-weight: 800; }
 .catalog-section-head > .btn { margin-left: auto; flex: none; padding: 6px 13px; font-size: 0.82rem; }
+.catalog-sort { display: inline-flex; margin-left: 6px; padding: 2px; border: 1.5px solid var(--border); border-radius: 999px; }
+.catalog-sort a { padding: 3px 10px; border-radius: 999px; color: var(--muted); font-size: 0.74rem; font-weight: 800; white-space: nowrap; }
+.catalog-sort a:hover { color: var(--accent-strong); text-decoration: none; }
+.catalog-sort .catalog-sort__active { background: color-mix(in srgb, var(--accent) 18%, var(--card)); color: var(--ink); }
+@media (max-width: 520px) {
+  .catalog-section-head { flex-wrap: wrap; row-gap: 8px; }
+  .catalog-sort { order: 3; margin-left: 0; }
+}
 .catalog-list {
   margin: 0;
   padding: 0;

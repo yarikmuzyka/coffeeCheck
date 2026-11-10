@@ -5,11 +5,39 @@ import { ConfirmSubmitButton } from '../components/ConfirmSubmitButton.jsx'
 import { requireUser } from '../../lib/auth.js'
 import { getUsageSnapshot } from '../../lib/entitlements.js'
 import { pluralizeUk } from '../../lib/format.js'
+import { normalizeCatalogSort, sortCatalog } from '../../lib/catalog-sort.js'
 
 export const dynamic = 'force-dynamic'
 
-function byName(a, b) {
-  return a.name.localeCompare(b.name, 'uk', { sensitivity: 'base' })
+function catalogHref(sorts) {
+  const params = new URLSearchParams()
+  if (sorts.roasters !== 'name') params.set('roasters', sorts.roasters)
+  if (sorts.processes !== 'name') params.set('processes', sorts.processes)
+  const search = params.toString()
+  return search ? `/roasters?${search}` : '/roasters'
+}
+
+function SortToggle({ list, sorts, label }) {
+  const options = [['name', 'А–Я', 'За назвою'], ['count', 'Кількість', 'За кількістю кав']]
+  return (
+    <nav className="catalog-sort" aria-label={label}>
+      {options.map(([value, text, title]) => {
+        const active = sorts[list] === value
+        return (
+          <Link
+            key={value}
+            href={catalogHref({ ...sorts, [list]: value })}
+            className={active ? 'catalog-sort__active' : undefined}
+            aria-current={active ? 'true' : undefined}
+            title={title}
+            scroll={false}
+          >
+            {text}
+          </Link>
+        )
+      })}
+    </nav>
+  )
 }
 
 function CoffeeCount({ count }) {
@@ -17,9 +45,14 @@ function CoffeeCount({ count }) {
   return <span className="catalog-count">{count} {pluralizeUk(count, ['кава', 'кави', 'кав'])}</span>
 }
 
-export default async function RoastersPage() {
+export default async function RoastersPage({ searchParams }) {
   const user = await requireUser()
-  const [roasters, processes, usage] = await Promise.all([
+  const params = await searchParams
+  const sorts = {
+    roasters: normalizeCatalogSort(params?.roasters),
+    processes: normalizeCatalogSort(params?.processes),
+  }
+  const [roasterRows, processRows, usage] = await Promise.all([
     prisma.roaster.findMany({
       where: { userId: user.id },
       include: { _count: { select: { coffees: true } } },
@@ -30,8 +63,8 @@ export default async function RoastersPage() {
     }),
     getUsageSnapshot(prisma, user.id),
   ])
-  roasters.sort(byName)
-  processes.sort(byName)
+  const roasters = sortCatalog(roasterRows, sorts.roasters)
+  const processes = sortCatalog(processRows, sorts.processes)
 
   return (
     <div className="catalog-page">
@@ -45,6 +78,7 @@ export default async function RoastersPage() {
           <div className="catalog-section-head">
             <h2 id="catalog-roasters">Обсмажчики</h2>
             <span className="catalog-total">{roasters.length}</span>
+            <SortToggle list="roasters" sorts={sorts} label="Сортування обсмажувачів" />
             {usage.resources.roasters.reached ? (
               <span className="btn btn--sm btn--disabled" aria-disabled="true">Ліміт вичерпано</span>
             ) : (
@@ -84,6 +118,7 @@ export default async function RoastersPage() {
           <div className="catalog-section-head">
             <h2 id="catalog-processes">Обробки</h2>
             <span className="catalog-total">{processes.length}</span>
+            <SortToggle list="processes" sorts={sorts} label="Сортування обробок" />
             <Link href="/processes/new" className="btn btn--secondary btn--sm">+ Додати</Link>
           </div>
 
