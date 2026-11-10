@@ -40,6 +40,7 @@ export const viewport = {
 const NAV = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/coffees', label: 'Кави' },
+  { href: '/new-lots', label: 'Нові лоти' },
   { href: '/roasters', label: 'Обсмажчики' },
   { href: '/plans', label: 'Тарифи' },
   { href: '/analytics', label: 'Аналітика' },

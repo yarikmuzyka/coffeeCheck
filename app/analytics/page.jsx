@@ -3,6 +3,7 @@ import { prisma } from '../../lib/prisma.js'
 import { computeOriginInsights, computeProcessInsights, coffeeScore } from '../../lib/stats.js'
 import { pluralizeUk } from '../../lib/format.js'
 import { requireUser } from '../../lib/auth.js'
+import { COFFEE_PROCESSES_INCLUDE, coffeeProcessLabel } from '../../lib/coffee-processes.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +15,9 @@ function originHref(country) {
   return `/analytics?country=${encodeURIComponent(country)}`
 }
 
-function processHref(process) {
-  return `/analytics?view=process&process=${encodeURIComponent(process)}`
+function processHref(process, mode = 'method') {
+  const modeParam = mode === 'combination' ? '&mode=combination' : ''
+  return `/analytics?view=process${modeParam}&process=${encodeURIComponent(process)}`
 }
 
 function OriginRanking({ origins, selectedKey }) {
@@ -52,7 +54,7 @@ function OriginRanking({ origins, selectedKey }) {
   )
 }
 
-function ProcessRanking({ processes, selectedKey }) {
+function ProcessRanking({ processes, selectedKey, mode }) {
   return (
     <ol className="origin-ranking" aria-label="Рейтинг обробок">
       {processes.map((process, index) => {
@@ -62,7 +64,7 @@ function ProcessRanking({ processes, selectedKey }) {
         return (
           <li key={process.key}>
             <Link
-              href={processHref(process.key)}
+              href={processHref(process.key, mode)}
               className={`origin-ranking__row${isSelected ? ' origin-ranking__row--active' : ''}`}
               aria-current={isSelected ? 'true' : undefined}
             >
@@ -122,7 +124,7 @@ function OriginDetail({ origin }) {
           <span>
             <strong>{topCoffee.name}</strong>
             <small>
-              {[topCoffee.roaster?.name, topCoffee.region, topCoffee.process].filter(Boolean).join(' · ')}
+              {[topCoffee.roaster?.name, topCoffee.region, coffeeProcessLabel(topCoffee)].filter(Boolean).join(' · ')}
             </small>
           </span>
           <b>{formatScore(coffeeScore(topCoffee))}</b>
@@ -142,15 +144,16 @@ function OriginDetail({ origin }) {
   )
 }
 
-function ProcessDetail({ process }) {
+function ProcessDetail({ process, mode }) {
   const topCountry = process.countries.find((country) => country.avg != null)
   const topCoffee = process.topCoffee
+  const isCombination = mode === 'combination'
 
   return (
     <section className="origin-detail" aria-label={`Деталі про обробку ${process.key}`}>
       <header className="origin-detail__head">
         <div>
-          <span>Обробка за твоїми оцінками</span>
+          <span>{isCombination ? 'Поєднання обробок за твоїми оцінками' : 'Обробка за твоїми оцінками'}</span>
           <h2>{process.key}</h2>
         </div>
         <div className="origin-detail__score">
@@ -171,14 +174,30 @@ function ProcessDetail({ process }) {
         ))}
       </div>
 
-      <p className="origin-detail__label">Твоя найкраща кава з цією обробкою</p>
+      {!isCombination && process.pairedWith.length > 0 && (
+        <p className="origin-insight">
+          Найчастіше поєднується з{' '}
+          {process.pairedWith.slice(0, 3).map((pair, index) => (
+            <span key={pair.key}>
+              {index > 0 && ', '}
+              <Link href={processHref(pair.key)}><strong>{pair.key}</strong></Link> ({pair.count})
+            </span>
+          ))}
+          .
+        </p>
+      )}
+
+      <p className="origin-detail__label">
+        {isCombination ? 'Твоя найкраща кава з цим поєднанням' : 'Твоя найкраща кава з цією обробкою'}
+      </p>
       {topCoffee ? (
         <Link href={`/coffees/${topCoffee.id}`} className="origin-winner">
           <span className="origin-winner__mark">TOP</span>
           <span>
             <strong>{topCoffee.name}</strong>
             <small>
-              {[topCoffee.roaster?.name, topCoffee.originCountry, topCoffee.region].filter(Boolean).join(' · ')}
+              {[topCoffee.roaster?.name, topCoffee.originCountry, isCombination ? null : coffeeProcessLabel(topCoffee)]
+                .filter(Boolean).join(' · ')}
             </small>
           </span>
           <b>{formatScore(coffeeScore(topCoffee))}</b>
@@ -189,7 +208,7 @@ function ProcessDetail({ process }) {
 
       {topCountry && (
         <p className="origin-insight">
-          Ця обробка найкраще заходить у каві з <strong>{topCountry.key}</strong>:
+          {isCombination ? 'Це поєднання' : 'Ця обробка'} найкраще заходить у каві з <strong>{topCountry.key}</strong>:
           {' '}середня оцінка <strong>{formatScore(topCountry.avg)}/5</strong> на основі{' '}
           {topCountry.ratedCount} {pluralizeUk(topCountry.ratedCount, ['оцінки', 'оцінок', 'оцінок'])}.
         </p>
@@ -203,11 +222,12 @@ export default async function AnalyticsPage({ searchParams }) {
   const params = await searchParams
   const coffees = await prisma.coffee.findMany({
     where: { userId: user.id },
-    include: { roaster: true },
+    include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
   })
   const view = params?.view === 'process' ? 'process' : 'origin'
+  const processMode = params?.mode === 'combination' ? 'combination' : 'method'
   const origins = computeOriginInsights(coffees)
-  const processes = computeProcessInsights(coffees)
+  const processes = computeProcessInsights(coffees, { mode: processMode })
   const requestedCountry = params?.country
   const requestedProcess = params?.process
   const selectedOrigin = origins.find((origin) => origin.key === requestedCountry) ?? origins[0]
@@ -240,17 +260,37 @@ export default async function AnalyticsPage({ searchParams }) {
           <OriginRanking origins={origins} selectedKey={selectedOrigin.key} />
           <OriginDetail origin={selectedOrigin} />
         </div>
-      ) : processes.length === 0 ? (
-        <div className="card analytics-empty">
-          <h2>Ще немає даних про обробку</h2>
-          <p>Додай обробку у картках кави.</p>
-          <Link href="/coffees" className="btn btn--primary">Перейти до кав</Link>
-        </div>
       ) : (
-        <div className="origin-analytics-grid">
-          <ProcessRanking processes={processes} selectedKey={selectedProcess.key} />
-          <ProcessDetail process={selectedProcess} />
-        </div>
+        <>
+          <nav className="analytics-mode" aria-label="Групування обробок">
+            <Link
+              href="/analytics?view=process"
+              className={processMode === 'method' ? 'analytics-mode__active' : undefined}
+              aria-current={processMode === 'method' ? 'page' : undefined}
+            >
+              Окремі методи
+            </Link>
+            <Link
+              href="/analytics?view=process&mode=combination"
+              className={processMode === 'combination' ? 'analytics-mode__active' : undefined}
+              aria-current={processMode === 'combination' ? 'page' : undefined}
+            >
+              Поєднання
+            </Link>
+          </nav>
+          {processes.length === 0 ? (
+            <div className="card analytics-empty">
+              <h2>Ще немає даних про обробку</h2>
+              <p>Додай обробку у картках кави.</p>
+              <Link href="/coffees" className="btn btn--primary">Перейти до кав</Link>
+            </div>
+          ) : (
+            <div className="origin-analytics-grid">
+              <ProcessRanking processes={processes} selectedKey={selectedProcess.key} mode={processMode} />
+              <ProcessDetail process={selectedProcess} mode={processMode} />
+            </div>
+          )}
+        </>
       )}
     </div>
   )

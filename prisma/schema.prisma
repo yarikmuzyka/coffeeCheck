@@ -21,13 +21,27 @@ enum Plan {
 }
 
 model Process {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
   userId    String
-  user      User     @relation("UserProcesses", fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  user      User            @relation("UserProcesses", fields: [userId], references: [id], onDelete: Cascade)
+  coffees   CoffeeProcess[]
+  createdAt DateTime        @default(now())
 
   @@index([userId])
+}
+
+// Кава може мати кілька обробок (natural + anaerobic). Видалення обробки,
+// яку використовує кава, блокується в застосунку (deleteProcess).
+model CoffeeProcess {
+  coffeeId  String
+  coffee    Coffee   @relation(fields: [coffeeId], references: [id], onDelete: Cascade)
+  processId String
+  process   Process  @relation(fields: [processId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([coffeeId, processId])
+  @@index([processId])
 }
 
 model Roaster {
@@ -48,25 +62,28 @@ model Roaster {
 }
 
 model Coffee {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String
   roasterId     String
-  roaster       Roaster   @relation(fields: [roasterId], references: [id], onDelete: Cascade)
+  roaster       Roaster         @relation(fields: [roasterId], references: [id], onDelete: Cascade)
   userId        String
-  user          User      @relation("UserCoffees", fields: [userId], references: [id], onDelete: Cascade)
+  user          User            @relation("UserCoffees", fields: [userId], references: [id], onDelete: Cascade)
   originCountry String?
   region        String?
   variety       String?
+  // Застаріле текстове поле: лишається як резервна копія даних до міграції
+  // на CoffeeProcess і показується лише для кав без жодної пов'язаної обробки.
   process       String?
+  processes     CoffeeProcess[]
   scaScore      Float?
   myScore       Float?
   purchaseDate  DateTime?
   price         Float?
-  isFinished    Boolean   @default(false)
+  isFinished    Boolean         @default(false)
   wouldBuyAgain Boolean?
   brewLogs      BrewLog[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([userId])
   @@index([userId, roasterId])
@@ -126,6 +143,48 @@ model User {
   coffees       Coffee[]          @relation("UserCoffees")
   brewLogs      BrewLog[]         @relation("UserBrewLogs")
   rateLimits    RateLimitBucket[]
+  wishedLots    WishedLot[]
+}
+
+model ExternalLot {
+  id            String      @id @default(cuid())
+  source        String
+  externalId    String
+  roasterName   String
+  name          String
+  productUrl    String
+  imageUrl      String?
+  originCountry String?
+  region        String?
+  processNames  String[]
+  tastingNotes  String[]
+  price         Float?
+  currency      String      @default("UAH")
+  packageSizes  String[]
+  isAvailable   Boolean     @default(true)
+  sourceBadge   String?
+  firstSeenAt   DateTime    @default(now())
+  lastSeenAt    DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  wishedBy      WishedLot[]
+
+  @@unique([source, externalId])
+  @@index([isAvailable, firstSeenAt])
+  @@index([roasterName])
+}
+
+model WishedLot {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lotId     String
+  lot       ExternalLot @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, lotId])
+  @@index([userId, createdAt])
+  @@index([lotId])
 }
 
 model RateLimitBucket {

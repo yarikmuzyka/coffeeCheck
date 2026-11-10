@@ -1,6 +1,6 @@
 {
   "name": "coffee-logger",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "test": "node --test",
@@ -11,6 +11,7 @@
     "db:seed": "node prisma/seed.js",
     "db:claim-owner": "node prisma/backfill-owner.js",
     "db:migrate-ratings-5": "node prisma/migrate-ratings-to-five.js",
+    "db:migrate-processes": "node prisma/migrate-coffee-processes.js",
     "db:reset": "prisma db push --force-reset && node prisma/seed.js",
     "postinstall": "prisma generate"
   },

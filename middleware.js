@@ -10,6 +10,6 @@ export const config = {
   // PWA-ресурси (manifest, іконки) мають бути доступні без сесії:
   // iOS завантажує їх анонімно під час встановлення на екран «Додому».
   matcher: [
-    '/((?!api/auth|login|_next/static|_next/image|favicon.ico|manifest.webmanifest|icons/|apple-touch-icon.png|coffee-logger-mark.svg).*)',
+    '/((?!api/auth|api/cron/|login|_next/static|_next/image|favicon.ico|manifest.webmanifest|icons/|apple-touch-icon.png|coffee-logger-mark.svg).*)',
   ],
 }

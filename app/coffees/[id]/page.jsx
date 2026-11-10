@@ -8,6 +8,7 @@ import { ConfirmSubmitButton } from '../../components/ConfirmSubmitButton.jsx'
 import { requireUser } from '../../../lib/auth.js'
 import { findOwnedCoffee } from '../../../lib/owned-coffees.js'
 import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { COFFEE_PROCESSES_INCLUDE, coffeeProcessLabel } from '../../../lib/coffee-processes.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,7 @@ export default async function CoffeeDetailPage({ params }) {
       userId: user.id,
       include: {
         roaster: true,
+        ...COFFEE_PROCESSES_INCLUDE,
         brewLogs: { where: { userId: user.id }, orderBy: { brewedAt: 'desc' } },
       },
     }),
@@ -38,7 +40,7 @@ export default async function CoffeeDetailPage({ params }) {
     ['Країна', coffee.originCountry],
     ['Регіон', coffee.region],
     ['Сорт', coffee.variety],
-    ['Обробка', coffee.process],
+    ['Обробка', coffeeProcessLabel(coffee)],
     ['Оцінка SCA', coffee.scaScore != null ? coffee.scaScore : null],
     ['Дата купівлі', fmtDate(coffee.purchaseDate)],
     ['Ціна', coffee.price != null ? `${coffee.price} ₴` : null],
