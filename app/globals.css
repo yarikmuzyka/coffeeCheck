@@ -163,6 +163,9 @@ a:hover { text-decoration: underline; }
 .new-lots-tabs a span { display: inline-grid; min-width: 22px; min-height: 22px; margin-left: 5px; place-items: center; border-radius: 999px; background: var(--border); color: var(--ink); font-size: 0.7rem; }
 .new-lots-tabs .new-lots-tabs__active { color: var(--ink); }
 .new-lots-tabs .new-lots-tabs__active::after { content: ''; position: absolute; right: 8px; bottom: -2px; left: 8px; height: 3px; border-radius: 3px 3px 0 0; background: var(--accent); }
+.new-lots-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: -6px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.76rem; font-weight: 700; }
+.new-lots-legend li { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.new-lots-legend span { font-size: 1rem; line-height: 1; }
 .new-lots-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto; align-items: end; gap: 10px; padding: 14px; }
 .new-lots-filters .field { gap: 4px; }
 .new-lots-filters .field > span { color: var(--muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
