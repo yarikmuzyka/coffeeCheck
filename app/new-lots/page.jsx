@@ -8,6 +8,16 @@ import { recommendLots, sortByRecommendation } from '../../lib/lot-recommendatio
 
 export const dynamic = 'force-dynamic'
 
+// Пояснення до емодзі в кутку фото пачки (див. lotMarker).
+const LEGEND = [
+  ['🎯', 'під твій смак'],
+  ['🤩', 'пив, 4.5+'],
+  ['🙂', 'пив, 3.5–4.4'],
+  ['😐', 'пив, 2.5–3.4'],
+  ['😖', 'пив, нижче 2.5'],
+  ['🤔', 'пив, без оцінки'],
+]
+
 function formatPrice(value, currency = 'UAH') {
   if (value == null) return 'Ціну не вказано'
   return new Intl.NumberFormat('uk-UA', {
@@ -167,6 +177,12 @@ export default async function NewLotsPage({ searchParams }) {
           Хочу спробувати <span>{wishedItems.length}</span>
         </Link>
       </nav>
+
+      <ul className="new-lots-legend" aria-label="Що означають емодзі на пачках">
+        {LEGEND.map(([emoji, label]) => (
+          <li key={emoji}><span aria-hidden="true">{emoji}</span> {label}</li>
+        ))}
+      </ul>
 
       <form className="new-lots-filters card" action="/new-lots">
         {tab !== 'new' && <input type="hidden" name="tab" value={tab} />}
