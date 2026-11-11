@@ -3,6 +3,8 @@ import { prisma } from '../../lib/prisma.js'
 import { requireUser } from '../../lib/auth.js'
 import { buildNewCoffeeHref, filterAndSortLots, matchesFeedFilters, newLotCutoff, uniqueSorted } from '../../lib/new-lot-feed.js'
 import { removeWishedLot, saveWishedLot } from '../../lib/new-lot-actions.js'
+import { COFFEE_PROCESSES_INCLUDE } from '../../lib/coffee-processes.js'
+import { recommendLots, sortByRecommendation } from '../../lib/lot-recommendations.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,23 +23,33 @@ function formatDate(value) {
 
 function filterHref(tab, filters = {}) {
   const params = new URLSearchParams()
-  if (tab === 'wish') params.set('tab', 'wish')
+  if (tab !== 'new') params.set('tab', tab)
   for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
   const query = params.toString()
   return query ? `/new-lots?${query}` : '/new-lots'
 }
 
-function LotImage({ lot }) {
-  if (!lot.imageUrl) {
-    return <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
-  }
-  return <img className="new-lot-image" src={lot.imageUrl} alt={`Пачка ${lot.name}`} loading="lazy" referrerPolicy="no-referrer" />
+function LotImage({ lot, marker }) {
+  return (
+    <div className="new-lot-media">
+      {lot.imageUrl ? (
+        <img className="new-lot-image" src={lot.imageUrl} alt={`Пачка ${lot.name}`} loading="lazy" referrerPolicy="no-referrer" />
+      ) : (
+        <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
+      )}
+      {marker && (
+        <span className="new-lot-marker" title={marker.label} role="img" aria-label={marker.label}>{marker.emoji}</span>
+      )}
+    </div>
+  )
 }
 
-function LotCard({ lot, isWished, wishCreatedAt }) {
+function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
+  const recommended = recommendation?.recommended
+  const marker = recommendation?.marker
   return (
     <article className="new-lot-card card">
-      <LotImage lot={lot} />
+      <LotImage lot={lot} marker={marker} />
       <div className="new-lot-card__copy">
         <div className="new-lot-card__eyebrow">
           <span>{lot.roasterName}</span>
@@ -49,6 +61,14 @@ function LotCard({ lot, isWished, wishCreatedAt }) {
           {[lot.originCountry, lot.region, lot.processNames.join(' + ')].filter(Boolean).join(' · ') || 'Деталі уточнюються'}
         </p>
         {lot.tastingNotes.length > 0 && <p className="new-lot-notes">{lot.tastingNotes.join(', ')}</p>}
+        {recommended && recommendation.reasonText && (
+          <p className="new-lot-why">🎯 {recommendation.reasonText}</p>
+        )}
+        {recommendation?.tried && (
+          <p className="new-lot-tried">
+            <Link href={`/coffees/${recommendation.triedCoffeeId}`}>{marker.label}</Link>
+          </p>
+        )}
         <p className="new-lot-seen">
           {wishCreatedAt ? `У списку з ${formatDate(wishCreatedAt)}` : `Знайдено ${formatDate(lot.firstSeenAt)}`}
           {lot.packageSizes.length > 0 ? ` · ${lot.packageSizes.join(' / ')}` : ''}
@@ -81,14 +101,14 @@ function LotCard({ lot, isWished, wishCreatedAt }) {
 export default async function NewLotsPage({ searchParams }) {
   const user = await requireUser()
   const params = await searchParams
-  const tab = params?.tab === 'wish' ? 'wish' : 'new'
+  const tab = ['wish', 'match'].includes(params?.tab) ? params.tab : 'new'
   const filters = {
     roaster: params?.roaster ?? '',
     country: params?.country ?? '',
     process: params?.process ?? '',
   }
 
-  const [recentLots, wishedItems, latestSync] = await Promise.all([
+  const [recentLots, wishedItems, latestSync, coffees] = await Promise.all([
     prisma.externalLot.findMany({
       where: { isAvailable: true, firstSeenAt: { gte: newLotCutoff() } },
       include: { wishedBy: { where: { userId: user.id }, select: { createdAt: true } } },
@@ -100,12 +120,24 @@ export default async function NewLotsPage({ searchParams }) {
       orderBy: { createdAt: 'desc' },
     }),
     prisma.externalLot.aggregate({ _max: { lastSeenAt: true } }),
+    prisma.coffee.findMany({
+      where: { userId: user.id },
+      include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
+    }),
   ])
 
-  const allFilterLots = tab === 'wish' ? wishedItems.map((item) => item.lot) : recentLots
-  const lots = tab === 'wish'
-    ? allFilterLots.filter((lot) => matchesFeedFilters(lot, filters))
-    : filterAndSortLots(allFilterLots, filters)
+  const recommendations = recommendLots(
+    [...recentLots, ...wishedItems.map((item) => item.lot)],
+    coffees,
+  )
+  const matchedLots = sortByRecommendation(
+    recentLots.filter((lot) => recommendations.get(lot.id)?.recommended),
+    recommendations,
+  )
+  const allFilterLots = tab === 'wish' ? wishedItems.map((item) => item.lot) : tab === 'match' ? matchedLots : recentLots
+  const lots = tab === 'new'
+    ? filterAndSortLots(allFilterLots, filters)
+    : allFilterLots.filter((lot) => matchesFeedFilters(lot, filters))
   const roasters = uniqueSorted(allFilterLots.map((lot) => lot.roasterName))
   const countries = uniqueSorted(allFilterLots.map((lot) => lot.originCountry))
   const processes = uniqueSorted(allFilterLots.flatMap((lot) => lot.processNames))
@@ -128,13 +160,16 @@ export default async function NewLotsPage({ searchParams }) {
         <Link href={filterHref('new')} className={tab === 'new' ? 'new-lots-tabs__active' : undefined}>
           Новинки <span>{recentLots.length}</span>
         </Link>
+        <Link href={filterHref('match')} className={tab === 'match' ? 'new-lots-tabs__active' : undefined}>
+          🎯 Для мене <span>{matchedLots.length}</span>
+        </Link>
         <Link href={filterHref('wish')} className={tab === 'wish' ? 'new-lots-tabs__active' : undefined}>
           Хочу спробувати <span>{wishedItems.length}</span>
         </Link>
       </nav>
 
       <form className="new-lots-filters card" action="/new-lots">
-        {tab === 'wish' && <input type="hidden" name="tab" value="wish" />}
+        {tab !== 'new' && <input type="hidden" name="tab" value={tab} />}
         <label className="field">
           <span>Обсмажчик</span>
           <select name="roaster" defaultValue={filters.roaster}>
@@ -168,13 +203,20 @@ export default async function NewLotsPage({ searchParams }) {
               lot={lot}
               isWished={wishedByLot.has(lot.id)}
               wishCreatedAt={wishedByLot.get(lot.id)}
+              recommendation={recommendations.get(lot.id)}
             />
           ))}
         </div>
       ) : (
         <div className="card new-lots-empty">
-          <h2>{tab === 'wish' ? 'Список поки порожній' : 'Новинок за цими фільтрами немає'}</h2>
-          <p>{tab === 'wish' ? 'Збережи цікаві лоти у вкладці «Новинки».' : 'Спробуй скинути фільтри або зазирни після наступного оновлення.'}</p>
+          <h2>{tab === 'wish' ? 'Список поки порожній' : tab === 'match' ? 'Поки нічого під твій смак' : 'Новинок за цими фільтрами немає'}</h2>
+          <p>
+            {tab === 'wish'
+              ? 'Збережи цікаві лоти у вкладці «Новинки».'
+              : tab === 'match'
+                ? 'Рекомендації рахуються з твоїх оцінок за країною, обробкою й обсмажчиком. Що більше оцінених кав, то точніше.'
+                : 'Спробуй скинути фільтри або зазирни після наступного оновлення.'}
+          </p>
           {tab === 'wish' && <Link className="btn btn--primary" href="/new-lots">Переглянути новинки</Link>}
         </div>
       )}

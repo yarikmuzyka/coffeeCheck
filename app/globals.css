@@ -175,6 +175,11 @@ a:hover { text-decoration: underline; }
 .new-lot-card__copy .meta { margin: 0; color: var(--muted); font-size: 0.82rem; }
 .new-lot-card__eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
 .new-lot-pill--muted { background: var(--border); color: var(--muted); }
+.new-lot-media { position: relative; }
+.new-lot-marker { position: absolute; top: -10px; left: -10px; display: grid; width: 40px; height: 40px; place-items: center; border: 2px solid var(--card); border-radius: 50%; background: var(--bg); font-size: 1.35rem; line-height: 1; cursor: default; }
+.new-lot-why { margin: 5px 0 0; color: var(--good); font-size: 0.74rem; font-weight: 700; }
+.new-lot-tried { margin: 5px 0 0; font-size: 0.74rem; font-weight: 700; }
+.new-lot-tried a { color: var(--muted); }
 .new-lot-notes { margin: 5px 0 0; font-size: 0.78rem; }
 .new-lot-seen { margin: 7px 0 0; color: var(--muted); font-size: 0.7rem; }
 .new-lot-card__actions { display: grid; justify-items: flex-end; gap: 10px; }
@@ -351,6 +356,7 @@ h3 { font-weight: 800; letter-spacing: -0.015em; }
 .home-score--empty { border: 1.5px dashed var(--accent); background: transparent; color: var(--accent-strong); font-size: 0.74rem; }
 .home-score--empty:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); text-decoration: none; }
 .home-tag { flex: none; padding: 3px 9px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent-strong); font-size: 0.7rem; font-weight: 800; white-space: nowrap; }
+.home-marker { flex: none; width: 24px; font-size: 1.05rem; line-height: 1; text-align: center; }
 .home-empty { margin: 0; padding: 14px 16px 16px; color: var(--muted); font-size: 0.86rem; }
 
 .home-section-title { margin: 0 0 8px; font-size: 1.02rem; }

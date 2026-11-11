@@ -5,6 +5,7 @@ import { formatWeightGrams, pluralizeUk } from '../../lib/format.js'
 import { requireUser } from '../../lib/auth.js'
 import { COFFEE_PROCESSES_INCLUDE, coffeeProcessLabel } from '../../lib/coffee-processes.js'
 import { newLotCutoff } from '../../lib/new-lot-feed.js'
+import { recommendLots, sortByRecommendation } from '../../lib/lot-recommendations.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,10 +97,12 @@ export default async function DashboardPage() {
     ...summary.openCoffees.filter((coffee) => coffeeScore(coffee) == null),
     ...summary.openCoffees.filter((coffee) => coffeeScore(coffee) != null),
   ].slice(0, OPEN_COFFEES_LIMIT)
-  // Лоти з міткою магазину — першими, далі найсвіжіші.
-  const featuredLots = [...newLots]
-    .sort((a, b) => Number(Boolean(b.sourceBadge)) - Number(Boolean(a.sourceBadge)))
-    .slice(0, NEW_LOTS_LIMIT)
+  // Спершу лоти під смак користувача, далі — з міткою магазину, далі найсвіжіші.
+  const recommendations = recommendLots(newLots, coffees)
+  const featuredLots = sortByRecommendation(
+    [...newLots].sort((a, b) => Number(Boolean(b.sourceBadge)) - Number(Boolean(a.sourceBadge))),
+    recommendations,
+  ).slice(0, NEW_LOTS_LIMIT)
 
   const name = firstName(user.name)
   const nudges = [
@@ -163,6 +166,16 @@ export default async function DashboardPage() {
             <ul className="home-list">
               {featuredLots.map((lot) => (
                 <li key={lot.id} className="home-row">
+                  {recommendations.get(lot.id)?.marker && (
+                    <span
+                      className="home-marker"
+                      role="img"
+                      title={recommendations.get(lot.id).marker.label}
+                      aria-label={recommendations.get(lot.id).marker.label}
+                    >
+                      {recommendations.get(lot.id).marker.emoji}
+                    </span>
+                  )}
                   <a href={lot.productUrl} target="_blank" rel="noreferrer" className="home-row__main">
                     <strong>{lot.name}</strong>
                     <small>{[lot.roasterName, lot.price != null ? formatMoney(lot.price) : null].filter(Boolean).join(' · ')}</small>
