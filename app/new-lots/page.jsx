@@ -63,7 +63,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
   const recommended = recommendation?.recommended
   const marker = recommendation?.marker
   return (
-    <article className="new-lot-card card">
+    <article className={`new-lot-card card${recommended ? ' new-lot-card--match' : ''}`}>
       <LotImage lot={lot} marker={marker} />
       <div className="new-lot-card__copy">
         <div className="new-lot-card__eyebrow">
@@ -75,7 +75,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
         <p className="meta">{lotMeta(lot)}</p>
         {lot.tastingNotes.length > 0 && <p className="new-lot-notes">{lot.tastingNotes.join(', ')}</p>}
         {recommended && recommendation.reasonText && (
-          <p className="new-lot-why">🎯 {recommendation.reasonText}</p>
+          <p className="new-lot-why">Під твій смак: {recommendation.reasonText}</p>
         )}
         {recommendation?.tried && (
           <p className="new-lot-tried">
@@ -102,7 +102,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
           ) : (
             <form action={saveWishedLot}>
               <input type="hidden" name="lotId" value={lot.id} />
-              <button className="btn btn--primary" type="submit">♡ Хочу спробувати</button>
+              <button className={`btn ${recommended ? 'btn--primary' : 'btn--secondary'}`} type="submit">Хочу спробувати</button>
             </form>
           )}
         </div>
@@ -188,7 +188,7 @@ export default async function NewLotsPage({ searchParams }) {
           Новинки <span>{recentLots.length}</span>
         </Link>
         <Link href={filterHref('match')} className={tab === 'match' ? 'new-lots-tabs__active' : undefined}>
-          🎯 Для мене <span>{matchedLots.length}</span>
+          Для мене <span>{matchedLots.length}</span>
         </Link>
         <Link href={filterHref('wish')} className={tab === 'wish' ? 'new-lots-tabs__active' : undefined}>
           Хочу спробувати <span>{wishedItems.length}</span>

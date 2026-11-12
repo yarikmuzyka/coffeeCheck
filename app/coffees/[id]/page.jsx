@@ -58,7 +58,7 @@ export default async function CoffeeDetailPage({ params }) {
         <div className="coffee-detail-head-actions">
           <div className="coffee-detail-action-stack">
             <Link href={`/coffees/${coffee.id}/edit`} className="btn btn--secondary btn--sm">
-              <span aria-hidden="true">✎</span> Редагувати
+              Редагувати
             </Link>
             <form action={deleteCoffee}>
               <input type="hidden" name="id" value={coffee.id} />
@@ -131,25 +131,25 @@ export default async function CoffeeDetailPage({ params }) {
           ) : (
             <div className="coffee-list">
               {coffee.brewLogs.map((log) => (
-                <article key={log.id} className="card">
-                  <div className="toolbar">
-                    <div>
-                      <h3 style={{ margin: 0 }}>
-                        {log.method}{log.recipeName ? ` — ${log.recipeName}` : ''}
-                      </h3>
-                      <p className="meta">
-                        {[fmtDate(log.brewedAt), log.ratio, log.doseGrams != null ? `${log.doseGrams} г кави` : null,
-                          log.waterGrams != null ? `${log.waterGrams} г води` : null]
-                          .filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    <div className="spacer" />
-                    <div className="score-pill">
-                      {log.overallScore ?? '—'}<br /><small>/5</small>
-                    </div>
+                <article key={log.id} className="card brew-log">
+                  <div className="brew-log__body">
+                    <h3 className="brew-log__method">
+                      {log.method}{log.recipeName ? <span> — {log.recipeName}</span> : null}
+                    </h3>
+                    <p className="brew-log__meta">
+                      {[fmtDate(log.brewedAt), log.ratio, log.doseGrams != null ? `${log.doseGrams} г кави` : null,
+                        log.waterGrams != null ? `${log.waterGrams} г води` : null]
+                        .filter(Boolean).join(' · ')}
+                    </p>
+                    {log.perceivedNotes && (
+                      <p className="brew-log__notes"><span>Ноти</span>{log.perceivedNotes}</p>
+                    )}
+                    {log.notes && <p className="brew-log__comment">{log.notes}</p>}
                   </div>
-                  {log.perceivedNotes && <p><strong>Ноти:</strong> {log.perceivedNotes}</p>}
-                  {log.notes && <p className="meta">{log.notes}</p>}
+                  <div className="brew-log__score" title="Загальна оцінка">
+                    <strong>{log.overallScore ?? '—'}</strong>
+                    <small>/5</small>
+                  </div>
                 </article>
               ))}
             </div>

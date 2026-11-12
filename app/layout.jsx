@@ -1,11 +1,26 @@
 import './globals.css'
 import Link from 'next/link'
+import { Lora, Inter } from 'next/font/google'
 import { getCurrentUser } from '../lib/auth.js'
 import { SignOutButton } from './components/SignOutButton.jsx'
 import { HeaderUsage } from './components/HeaderUsage.jsx'
 import { getUsageSnapshot } from '../lib/entitlements.js'
 import { prisma } from '../lib/prisma.js'
 import { LogoMark } from './components/LogoMark.jsx'
+
+// Ceramic Calm: сериф для заголовків, sans-serif для тексту. Next.js самохостить шрифти.
+const lora = Lora({
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-lora',
+})
+const inter = Inter({
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-inter',
+})
 
 export const metadata = {
   title: 'coffee logger — Brew Journal',
@@ -27,8 +42,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ff6b35' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1206' },
+    { media: '(prefers-color-scheme: light)', color: '#f5f0e6' },
+    { media: '(prefers-color-scheme: dark)', color: '#1b1613' },
   ],
   // cover — щоб standalone-режим на iPhone малювався під статус-баром,
   // а відступи контролювались через env(safe-area-inset-*)
@@ -38,7 +53,7 @@ export const viewport = {
 }
 
 const NAV = [
-  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/dashboard', label: 'Головна' },
   { href: '/coffees', label: 'Кави' },
   { href: '/new-lots', label: 'Нові лоти' },
   { href: '/roasters', label: 'Обсмажчики' },
@@ -51,7 +66,7 @@ export default async function RootLayout({ children }) {
   const usage = user ? await getUsageSnapshot(prisma, user.id) : null
 
   return (
-    <html lang="uk">
+    <html lang="uk" className={`${lora.variable} ${inter.variable}`}>
       <body>
         <header className="topbar">
           <Link href={user ? '/dashboard' : '/login'} className="brand">

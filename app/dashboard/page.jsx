@@ -44,9 +44,8 @@ function OpenCoffeeRow({ coffee }) {
         <strong>{coffee.name}</strong>
         <small>{meta}</small>
       </Link>
-      <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="home-icon" title="Додати заварювання">
-        <span aria-hidden="true">☕</span>
-        <span className="sr-only">Додати заварювання для {coffee.name}</span>
+      <Link href={`/brew-logs/new?coffee=${coffee.id}`} className="home-brew" title="Додати заварювання">
+        Заварити<span className="sr-only"> {coffee.name}</span>
       </Link>
       {score != null ? (
         <span className="home-score" title="Моя оцінка">{formatScore(score)}</span>
@@ -186,7 +185,7 @@ export default async function DashboardPage() {
             </ul>
           )}
           <Link href="/new-lots?tab=wish" className="home-card__foot">
-            <span aria-hidden="true">♡</span> Хочу спробувати: {wishedCount}
+            Хочу спробувати: {wishedCount}
           </Link>
         </section>
       </div>
