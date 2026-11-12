@@ -169,6 +169,19 @@ a:hover { text-decoration: underline; }
 .new-lots-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto; align-items: end; gap: 10px; padding: 14px; }
 .new-lots-filters .field { gap: 4px; }
 .new-lots-filters .field > span { color: var(--muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+.hoba { display: grid; gap: 12px; }
+.hoba__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px dashed var(--border); border-radius: var(--radius-md); }
+.hoba__bar p { margin: 0; color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+.hoba__button { flex: none; font-size: 1rem; }
+.new-lot-card.hoba__card { position: relative; border: 2px solid var(--accent); animation: hoba-drop 0.35s ease-out; }
+.hoba__close { position: absolute; top: 6px; right: 8px; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+.hoba__close:hover { background: var(--border); color: var(--ink); }
+.hoba__saved { pointer-events: none; }
+@keyframes hoba-drop { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hoba__card { animation: none; } }
+@media (max-width: 520px) {
+  .hoba__bar { flex-direction: column; align-items: stretch; text-align: center; }
+}
 .new-lots-list { display: grid; gap: 14px; }
 .new-lot-card { display: grid; grid-template-columns: 116px minmax(0, 1fr) auto; align-items: center; gap: 18px; }
 .new-lot-image { display: block; width: 116px; height: 116px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-2); }
