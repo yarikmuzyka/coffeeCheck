@@ -7,11 +7,11 @@
 ## ADDED Requirements
 
 ### Requirement: Палітра Ceramic Calm
-The system SHALL render every page on a warm ivory background with deep espresso text, use a muted sage colour for primary actions, active states and scores, and use terracotta only for secondary accents. Bright orange MUST NOT be used as a dominant colour, and gradients MUST NOT be used for surfaces.
+The system SHALL render every page on a light milk/oat background with a barely visible paper texture and deep espresso text, use a warm clay colour for primary actions and the active navigation state, and use muted sage only for secondary states. Bright orange MUST NOT be used as a dominant colour, and gradients and heavy shadows MUST NOT be used for surfaces.
 
-#### Scenario: Світлий фон і шавлієва дія
-- **WHEN** користувач відкриває будь-яку сторінку
-- **THEN** фон сторінки і топбару світлий, а основна кнопка дії шавлієва
+#### Scenario: Глиняна основна дія
+- **WHEN** користувач відкриває головну
+- **THEN** кнопка «+ Додати каву» має глиняний фон, а фон сторінки світлий вівсяний
 
 #### Scenario: Денна тема за замовчуванням
 - **GIVEN** в операційній системі увімкнена світла тема або тему не вказано
@@ -19,12 +19,12 @@ The system SHALL render every page on a warm ivory background with deep espresso
 - **THEN** застосунок відображається в денній палітрі
 
 ### Requirement: Нічна тема
-The system SHALL switch to a night variant of Ceramic Calm when the operating system prefers a dark colour scheme: a warm dark espresso background, light cream text, lighter sage for primary actions and scores, and lighter terracotta for secondary accents. The night variant MUST keep the same layout, typography and contrast rules as the day variant.
+The system SHALL switch to a night variant of Ceramic Calm when the operating system prefers a dark colour scheme: a warm dark espresso background, light cream text, lighter clay for primary actions and lighter sage for secondary states. The night variant MUST keep the same layout, typography and contrast rules as the day variant.
 
 #### Scenario: Системна темна тема
 - **GIVEN** в операційній системі увімкнена темна тема
 - **WHEN** користувач відкриває будь-яку сторінку
-- **THEN** фон сторінки, топбару й карток темний, текст світлий, а основна кнопка дії шавлієва
+- **THEN** фон сторінки, топбару й карток темний, текст світлий, а основна кнопка дії глиняна
 
 #### Scenario: Перемикання на льоту
 - **GIVEN** застосунок відкрито в денній темі
@@ -33,14 +33,38 @@ The system SHALL switch to a night variant of Ceramic Calm when the operating sy
 
 #### Scenario: Контраст уночі
 - **WHEN** застосунок у нічній темі
-- **THEN** основний і другорядний текст, текст на шавлієвих кнопках та посилання мають контраст не нижче 4.5:1
+- **THEN** основний і другорядний текст, текст на глиняних кнопках та посилання мають контраст не нижче 4.5:1
 
 ### Requirement: Типографіка
-The system SHALL display page and section headings, prices and scores in a serif typeface and all body text, labels and controls in a sans-serif typeface. Body text MUST NOT use a typewriter or monospace face.
+The system SHALL display large page headings, section headings, prices and scores in an editorial serif typeface with full Cyrillic support, and all navigation, forms, labels and data in a sans-serif typeface. Body text MUST NOT use a typewriter or monospace face.
 
-#### Scenario: Сериф у заголовках
+#### Scenario: Редакційний заголовок
+- **WHEN** користувач відкриває головну або «Нові лоти»
+- **THEN** заголовок сторінки набраний серифом, а навігація, фільтри й кнопки — sans-serif
+
+### Requirement: Щоденник на головній
+The system SHALL compose the home page as a coffee journal: a greeting with the current date first, an obvious primary action to add a coffee beside it, the most recent coffee entries as the main content, and statistics condensed into a single compact line that does not compete with the entries.
+
+#### Scenario: Перший екран головної
+- **WHEN** користувач відкриває головну на десктопі
+- **THEN** у верхній частині видно привітання з датою, кнопку «+ Додати каву» і початок списку «Останні записи»
+
+#### Scenario: Компактна статистика
 - **WHEN** користувач відкриває головну
-- **THEN** заголовок привітання і назви секцій набрані серифом, а описи й кнопки — sans-serif
+- **THEN** кількість кав, розхід, покупки за 30 днів і середня оцінка показані одним рядком тексту, а не окремими плитками
+
+### Requirement: Стани не лише кольором
+The system SHALL convey every state with text or a symbol in addition to colour: unrated coffees show the word «Оцінити», scores show the number with «/5», lot markers show a short text label next to the emoji, and the active tab or navigation item is underlined.
+
+#### Scenario: Неоцінена кава
+- **GIVEN** відкрита кава без оцінки
+- **WHEN** вона показана в «Останніх записах»
+- **THEN** поруч є текстова мітка «Оцінити»
+
+#### Scenario: Позначка лота з підписом
+- **GIVEN** лот рекомендований під смак користувача
+- **WHEN** користувач відкриває «Нові лоти»
+- **THEN** на фото пачки видно позначку 🎯 разом із текстом «під твій смак»
 
 ### Requirement: Контраст і фокус
 The system SHALL keep text contrast at WCAG AA level (at least 4.5:1 for body text) against its background, and every interactive control MUST show a visible focus indicator when reached by keyboard.
@@ -58,7 +82,7 @@ The system SHALL lay out every page without horizontal scrolling at a 375 px wid
 
 #### Scenario: Телефон
 - **WHEN** головну або сторінку нових лотів відкривають на екрані шириною 375 px
-- **THEN** вміст вміщується по ширині без горизонтальної прокрутки
+- **THEN** вміст вміщується по ширині без горизонтальної прокрутки, а картки лотів ідуть в одну колонку
 
 ### Requirement: Гліфи в інтерфейсі
 The system SHALL NOT use decorative emoji in buttons, navigation or section headings. Emoji MAY appear only as functional lot markers (🎯 🤩 🙂 😐 😖 🤔) and in their legend.
@@ -66,11 +90,6 @@ The system SHALL NOT use decorative emoji in buttons, navigation or section head
 #### Scenario: Кнопки без емодзі
 - **WHEN** користувач бачить кнопки «Хоба», «Хочу спробувати» чи дію заварювання на головній
 - **THEN** вони підписані лише текстом
-
-#### Scenario: Позначки лотів лишаються
-- **GIVEN** лот рекомендований під смак користувача
-- **WHEN** користувач відкриває «Нові лоти»
-- **THEN** у кутку фото пачки показано 🎯
 
 ### Requirement: Ієрархія журналу заварювань
 The system SHALL present each brew log entry with the brew method as the most prominent element, followed by date and brew parameters, then tasting notes, with the score shown separately.

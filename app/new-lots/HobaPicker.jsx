@@ -39,8 +39,8 @@ export default function HobaPicker({ lots }) {
               <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
             )}
             {picked.marker && (
-              <span className="new-lot-marker" title={picked.marker.label} role="img" aria-label={picked.marker.label}>
-                {picked.marker.emoji}
+              <span className="new-lot-marker" title={picked.marker.label}>
+                <span aria-hidden="true">{picked.marker.emoji}</span> {picked.marker.short ?? picked.marker.label}
               </span>
             )}
           </div>

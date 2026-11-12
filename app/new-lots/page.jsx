@@ -53,7 +53,9 @@ function LotImage({ lot, marker }) {
         <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
       )}
       {marker && (
-        <span className="new-lot-marker" title={marker.label} role="img" aria-label={marker.label}>{marker.emoji}</span>
+        <span className="new-lot-marker" title={marker.label}>
+          <span aria-hidden="true">{marker.emoji}</span> {marker.short ?? marker.label}
+        </span>
       )}
     </div>
   )
@@ -174,8 +176,8 @@ export default async function NewLotsPage({ searchParams }) {
     <div className="new-lots-page">
       <header className="new-lots-head">
         <div>
-          <h1>Нові лоти</h1>
-          <p className="sub">Свіжа фільтр-кава від DAM Coffee, Foundation і Penyora</p>
+          <p className="home-kicker">Свіжа фільтр-кава · DAM Coffee, Foundation, Penyora</p>
+          <h1>Нові <em>лоти</em></h1>
         </div>
         <p className="new-lots-updated">
           {latestSync._max.lastSeenAt ? `Перевірено ${formatDate(latestSync._max.lastSeenAt)}` : 'Очікуємо перше оновлення'}

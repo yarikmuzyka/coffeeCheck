@@ -104,3 +104,10 @@ test('tried lots carry the score of the matching coffee', () => {
   assert.equal(recs.get('nyeri').triedScore, 4)
   assert.equal(recs.get('nyeri').marker.emoji, '🙂')
 })
+
+test('markers carry a short text label so state is not shown by emoji alone', async () => {
+  const { lotMarker } = await import('../lib/lot-recommendations.js')
+  assert.equal(lotMarker({ recommended: true, tried: false }).short, 'під твій смак')
+  assert.equal(lotMarker({ tried: true, triedScore: 4.8 }).short, 'пив · 4.8')
+  assert.equal(lotMarker({ tried: true, triedScore: null }).short, 'пив, без оцінки')
+})
