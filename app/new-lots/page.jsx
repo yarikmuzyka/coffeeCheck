@@ -5,6 +5,7 @@ import { buildNewCoffeeHref, filterAndSortLots, matchesFeedFilters, newLotCutoff
 import { removeWishedLot, saveWishedLot } from '../../lib/new-lot-actions.js'
 import { COFFEE_PROCESSES_INCLUDE } from '../../lib/coffee-processes.js'
 import { recommendLots, sortByRecommendation } from '../../lib/lot-recommendations.js'
+import HobaPicker from './HobaPicker.jsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,10 @@ function formatPrice(value, currency = 'UAH') {
     currency,
     maximumFractionDigits: 0,
   }).format(value)
+}
+
+function lotMeta(lot) {
+  return [lot.originCountry, lot.region, lot.processNames.join(' + ')].filter(Boolean).join(' · ') || 'Деталі уточнюються'
 }
 
 function formatDate(value) {
@@ -67,9 +72,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
           {!lot.isAvailable && <span className="pill new-lot-pill--muted">Не в продажу</span>}
         </div>
         <h2>{lot.name}</h2>
-        <p className="meta">
-          {[lot.originCountry, lot.region, lot.processNames.join(' + ')].filter(Boolean).join(' · ') || 'Деталі уточнюються'}
-        </p>
+        <p className="meta">{lotMeta(lot)}</p>
         {lot.tastingNotes.length > 0 && <p className="new-lot-notes">{lot.tastingNotes.join(', ')}</p>}
         {recommended && recommendation.reasonText && (
           <p className="new-lot-why">🎯 {recommendation.reasonText}</p>
@@ -152,6 +155,20 @@ export default async function NewLotsPage({ searchParams }) {
   const countries = uniqueSorted(allFilterLots.map((lot) => lot.originCountry))
   const processes = uniqueSorted(allFilterLots.flatMap((lot) => lot.processNames))
   const wishedByLot = new Map(wishedItems.map((item) => [item.lotId, item.createdAt]))
+  // Кандидати для «Хоба» — рівно те, що зараз видно у «Новинках», лише потрібні поля.
+  const hobaLots = tab === 'new'
+    ? lots.map((lot) => ({
+      id: lot.id,
+      name: lot.name,
+      roasterName: lot.roasterName,
+      meta: lotMeta(lot),
+      priceText: formatPrice(lot.price, lot.currency),
+      productUrl: lot.productUrl,
+      imageUrl: lot.imageUrl,
+      marker: recommendations.get(lot.id)?.marker ?? null,
+      isWished: wishedByLot.has(lot.id),
+    }))
+    : []
 
   return (
     <div className="new-lots-page">
@@ -210,6 +227,8 @@ export default async function NewLotsPage({ searchParams }) {
         <button className="btn btn--primary" type="submit">Застосувати</button>
         <Link className="btn btn--ghost" href={filterHref(tab)}>Скинути</Link>
       </form>
+
+      {hobaLots.length > 0 && <HobaPicker lots={hobaLots} />}
 
       {lots.length > 0 ? (
         <div className="new-lots-list">
