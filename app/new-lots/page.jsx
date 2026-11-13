@@ -53,7 +53,9 @@ function LotImage({ lot, marker }) {
         <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
       )}
       {marker && (
-        <span className="new-lot-marker" title={marker.label} role="img" aria-label={marker.label}>{marker.emoji}</span>
+        <span className="new-lot-marker" title={marker.label}>
+          <span aria-hidden="true">{marker.emoji}</span> {marker.short ?? marker.label}
+        </span>
       )}
     </div>
   )
@@ -63,7 +65,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
   const recommended = recommendation?.recommended
   const marker = recommendation?.marker
   return (
-    <article className="new-lot-card card">
+    <article className={`new-lot-card card${recommended ? ' new-lot-card--match' : ''}`}>
       <LotImage lot={lot} marker={marker} />
       <div className="new-lot-card__copy">
         <div className="new-lot-card__eyebrow">
@@ -75,7 +77,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
         <p className="meta">{lotMeta(lot)}</p>
         {lot.tastingNotes.length > 0 && <p className="new-lot-notes">{lot.tastingNotes.join(', ')}</p>}
         {recommended && recommendation.reasonText && (
-          <p className="new-lot-why">🎯 {recommendation.reasonText}</p>
+          <p className="new-lot-why">Під твій смак: {recommendation.reasonText}</p>
         )}
         {recommendation?.tried && (
           <p className="new-lot-tried">
@@ -102,7 +104,7 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
           ) : (
             <form action={saveWishedLot}>
               <input type="hidden" name="lotId" value={lot.id} />
-              <button className="btn btn--primary" type="submit">♡ Хочу спробувати</button>
+              <button className={`btn ${recommended ? 'btn--primary' : 'btn--secondary'}`} type="submit">Хочу спробувати</button>
             </form>
           )}
         </div>
@@ -174,8 +176,8 @@ export default async function NewLotsPage({ searchParams }) {
     <div className="new-lots-page">
       <header className="new-lots-head">
         <div>
-          <h1>Нові лоти</h1>
-          <p className="sub">Свіжа фільтр-кава від DAM Coffee, Foundation і Penyora</p>
+          <p className="home-kicker">Свіжа фільтр-кава · DAM Coffee, Foundation, Penyora</p>
+          <h1>Нові <em>лоти</em></h1>
         </div>
         <p className="new-lots-updated">
           {latestSync._max.lastSeenAt ? `Перевірено ${formatDate(latestSync._max.lastSeenAt)}` : 'Очікуємо перше оновлення'}
@@ -188,7 +190,7 @@ export default async function NewLotsPage({ searchParams }) {
           Новинки <span>{recentLots.length}</span>
         </Link>
         <Link href={filterHref('match')} className={tab === 'match' ? 'new-lots-tabs__active' : undefined}>
-          🎯 Для мене <span>{matchedLots.length}</span>
+          Для мене <span>{matchedLots.length}</span>
         </Link>
         <Link href={filterHref('wish')} className={tab === 'wish' ? 'new-lots-tabs__active' : undefined}>
           Хочу спробувати <span>{wishedItems.length}</span>

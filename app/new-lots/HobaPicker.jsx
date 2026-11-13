@@ -25,8 +25,8 @@ export default function HobaPicker({ lots }) {
     <section className="hoba" aria-label="Випадкова кава">
       <div className="hoba__bar">
         <p>Не можеш вибрати? Хай вирішить випадок — серед {lots.length} {pluralizeUk(lots.length, ['лота', 'лотів', 'лотів'])}.</p>
-        <button type="button" className="btn btn--primary hoba__button" onClick={roll}>
-          🎲 Хоба
+        <button type="button" className="btn btn--terra hoba__button" onClick={roll}>
+          Хоба
         </button>
       </div>
 
@@ -39,8 +39,8 @@ export default function HobaPicker({ lots }) {
               <div className="new-lot-image new-lot-image--empty" aria-hidden="true">V60</div>
             )}
             {picked.marker && (
-              <span className="new-lot-marker" title={picked.marker.label} role="img" aria-label={picked.marker.label}>
-                {picked.marker.emoji}
+              <span className="new-lot-marker" title={picked.marker.label}>
+                <span aria-hidden="true">{picked.marker.emoji}</span> {picked.marker.short ?? picked.marker.label}
               </span>
             )}
           </div>
@@ -57,11 +57,11 @@ export default function HobaPicker({ lots }) {
             <div className="new-lot-card__buttons">
               <a className="btn btn--ghost" href={picked.productUrl} target="_blank" rel="noreferrer">До магазину ↗</a>
               {picked.isWished ? (
-                <span className="btn btn--ghost hoba__saved">♡ У списку</span>
+                <span className="btn btn--ghost hoba__saved">У списку</span>
               ) : (
                 <form action={saveWishedLot}>
                   <input type="hidden" name="lotId" value={picked.id} />
-                  <button className="btn btn--primary" type="submit">♡ Хочу спробувати</button>
+                  <button className="btn btn--primary" type="submit">Хочу спробувати</button>
                 </form>
               )}
             </div>
