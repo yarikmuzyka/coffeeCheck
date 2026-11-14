@@ -138,12 +138,12 @@ export default async function DashboardPage() {
         </section>
       </header>
 
-      <p className="home-stats" aria-label="Коротка статистика">
-        <span><b>{summary.totalCoffees}</b> {pluralizeUk(summary.totalCoffees, ['кава', 'кави', 'кав'])} у колекції, {summary.openCount} {pluralizeUk(summary.openCount, ['відкрита', 'відкриті', 'відкритих'])}</span>
-        <span><b>{formatWeightGrams(monthlyWeight)}</b> на місяць</span>
-        <span><b>{summary.recentCount}</b> {pluralizeUk(summary.recentCount, ['пачка', 'пачки', 'пачок'])}{summary.recentCount > 0 ? ` · ${formatMoney(summary.recentSpent)}` : ''} за {summary.recentDays} днів</span>
-        <span><b>{formatScore(summary.averageScore)}</b> середня оцінка</span>
-      </p>
+      <ul className="home-stats" aria-label="Коротка статистика">
+        <li><b>{summary.totalCoffees}</b><span>{pluralizeUk(summary.totalCoffees, ['кава', 'кави', 'кав'])} у колекції · {summary.openCount} {pluralizeUk(summary.openCount, ['відкрита', 'відкриті', 'відкритих'])}</span></li>
+        <li><b>{formatWeightGrams(monthlyWeight)}</b><span>розхід на місяць</span></li>
+        <li><b>{summary.recentCount > 0 ? formatMoney(summary.recentSpent) : summary.recentCount}</b><span>{summary.recentCount} {pluralizeUk(summary.recentCount, ['пачка', 'пачки', 'пачок'])} за {summary.recentDays} днів</span></li>
+        <li><b>{formatScore(summary.averageScore)}</b><span>середня оцінка</span></li>
+      </ul>
 
       <div className="home-grid">
         <section className="home-journal" aria-labelledby="home-journal-title">
