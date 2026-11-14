@@ -7,7 +7,7 @@
 ## ADDED Requirements
 
 ### Requirement: Палітра Ceramic Calm
-The system SHALL render every page on a light milk/oat background with a barely visible paper texture and deep espresso text, use a warm clay colour for primary actions and the active navigation state, and use muted sage only for secondary states. Bright orange MUST NOT be used as a dominant colour, and gradients and heavy shadows MUST NOT be used for surfaces.
+The system SHALL render every page on a flat light milk/oat background without texture, with white cards separated by a clearly visible border, and deep espresso text, use a warm clay colour for primary actions and the active navigation state, and use muted sage only for secondary states. Bright orange MUST NOT be used as a dominant colour, and gradients and heavy shadows MUST NOT be used for surfaces.
 
 #### Scenario: Глиняна основна дія
 - **WHEN** користувач відкриває головну
@@ -36,14 +36,18 @@ The system SHALL switch to a night variant of Ceramic Calm when the operating sy
 - **THEN** основний і другорядний текст, текст на глиняних кнопках та посилання мають контраст не нижче 4.5:1
 
 ### Requirement: Типографіка
-The system SHALL display large page headings, section headings, prices and scores in an editorial serif typeface with full Cyrillic support, and all navigation, forms, labels and data in a sans-serif typeface. Body text MUST NOT use a typewriter or monospace face.
+The system SHALL display large page headings, section headings, prices and scores in a low-contrast serif typeface with full Cyrillic support, and all navigation, forms, labels and data in a sans-serif typeface. Body text SHALL be at least 16 px, secondary text at least 14 px, and no text SHALL be smaller than 13 px. Headings MUST NOT be set in italic, labels MUST NOT use uppercase letter-spaced text, and body text MUST NOT use a typewriter or monospace face.
 
 #### Scenario: Редакційний заголовок
 - **WHEN** користувач відкриває головну або «Нові лоти»
-- **THEN** заголовок сторінки набраний серифом, а навігація, фільтри й кнопки — sans-serif
+- **THEN** заголовок сторінки набраний серифом без курсиву, а навігація, фільтри й кнопки — sans-serif
+
+#### Scenario: Мінімальний розмір тексту
+- **WHEN** користувач переглядає будь-яку сторінку
+- **THEN** жоден текст не менший за 13 px, а підписи полів, дат і бейджів не набрані великими літерами з розрідженням
 
 ### Requirement: Щоденник на головній
-The system SHALL compose the home page as a coffee journal: a greeting with the current date first, an obvious primary action to add a coffee beside it, the most recent coffee entries as the main content, and statistics condensed into a single compact line that does not compete with the entries.
+The system SHALL compose the home page as a coffee journal: a greeting with the current date first, an obvious primary action to add a coffee beside it, the most recent coffee entries as the main content, and statistics condensed into a row of four compact tiles that does not compete with the entries.
 
 #### Scenario: Перший екран головної
 - **WHEN** користувач відкриває головну на десктопі
@@ -51,7 +55,7 @@ The system SHALL compose the home page as a coffee journal: a greeting with the 
 
 #### Scenario: Компактна статистика
 - **WHEN** користувач відкриває головну
-- **THEN** кількість кав, розхід, покупки за 30 днів і середня оцінка показані одним рядком тексту, а не окремими плитками
+- **THEN** кількість кав, розхід, покупки за 30 днів і середня оцінка показані рядом із чотирьох компактних плиток «цифра + підпис» під привітанням; на 375 px плитки йдуть сіткою 2×2
 
 ### Requirement: Стани не лише кольором
 The system SHALL convey every state with text or a symbol in addition to colour: unrated coffees show the word «Оцінити», scores show the number with «/5», lot markers show a short text label next to the emoji, and the active tab or navigation item is underlined.
@@ -75,7 +79,7 @@ The system SHALL keep text contrast at WCAG AA level (at least 4.5:1 for body te
 
 #### Scenario: Читабельний приглушений текст
 - **WHEN** на картці показано другорядний текст (обсмажчик, дата, ціна)
-- **THEN** його контраст із фоном картки не нижчий за 4.5:1
+- **THEN** його контраст із фоном картки не нижчий за 7:1 у денній і нічній темі
 
 ### Requirement: Адаптивність
 The system SHALL lay out every page without horizontal scrolling at a 375 px wide viewport and SHALL keep a comfortable multi-column layout on desktop widths.
