@@ -11,15 +11,17 @@ import { NavLinks } from './components/NavLinks.jsx'
 
 // Ceramic Calm: Literata (низький контраст штрихів, кирилиця) для заголовків,
 // Inter для тексту. Next.js самохостить шрифти.
+// Обидва шрифти variable: на запит окремих ваг Google Fonts інколи віддає
+// інстансовані файли `/l/font?kit=…` без розширення, і next/font падає на білді.
 const literata = Literata({
   subsets: ['latin', 'latin-ext', 'cyrillic'],
-  weight: ['400', '500', '600'],
+  weight: 'variable',
   display: 'swap',
   variable: '--font-literata',
 })
 const inter = Inter({
   subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
-  weight: ['400', '500', '600'],
+  weight: 'variable',
   display: 'swap',
   variable: '--font-inter',
 })
