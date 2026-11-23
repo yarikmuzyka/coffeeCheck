@@ -176,7 +176,7 @@ export default async function NewLotsPage({ searchParams }) {
     <div className="new-lots-page">
       <header className="new-lots-head">
         <div>
-          <p className="home-kicker">Свіжа фільтр-кава · DAM Coffee, Foundation, Penyora</p>
+          <p className="home-kicker">Свіжа кава · DAM Coffee, Foundation, Penyora, Three Mississippi</p>
           <h1>Нові <em>лоти</em></h1>
         </div>
         <p className="new-lots-updated">

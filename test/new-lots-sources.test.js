@@ -9,6 +9,11 @@ import {
   isFoundationFilterCard,
 } from '../lib/new-lots/sources/foundation.js'
 import { fetchPenyoraLots, parsePenyoraCatalog, PENYORA_URL } from '../lib/new-lots/sources/penyora.js'
+import {
+  fetchThreeMississippiLots,
+  parseThreeMississippiCatalog,
+  THREE_MISSISSIPPI_URL,
+} from '../lib/new-lots/sources/three-mississippi.js'
 import { mergePackageVariants } from '../lib/new-lots/normalize.js'
 
 // ---------------------------------------------------------------------------
@@ -182,6 +187,47 @@ const PENYORA_HTML = `<!DOCTYPE html><html><body><div id="__next"></div>
   page: '/shop/[category]',
 })}</script></body></html>`
 
+function tmVariants(weights, { grinds = ['В зерні', 'Чашка'], available = true, prices = {} } = {}) {
+  return grinds.flatMap((grind) => weights.map((weight) => ({
+    title: `${grind} / ${weight}`,
+    option1: grind,
+    option2: weight,
+    price: prices[weight] ?? '650.00',
+    available: typeof available === 'function' ? available(grind, weight) : available,
+  })))
+}
+
+function tmProduct(id, handle, title, body, variants, extra = {}) {
+  return {
+    id,
+    handle,
+    title,
+    body_html: `<p>${body}</p>`,
+    product_type: 'Кава',
+    tags: [],
+    images: [{ src: `https://cdn.shopify.com/files/${handle}.jpg` }],
+    variants,
+    ...extra,
+  }
+}
+
+const THREE_MISSISSIPPI_JSON = {
+  products: [
+    tmProduct(1, 'washed-kenya-turkana', 'Мита Кенія Туркана', 'Ця мита спешелті кава в зернах з Кенії.',
+      tmVariants(['250 г', '400 г'], { prices: { '250 г': '650.00', '400 г': '940.00' } }), { tags: ['Classic'] }),
+    tmProduct(2, 'banana-colombia-quindio', 'Банан Ла Глоріета',
+      'Інфʼюзована бананом і оброблена методом хані-анаеробної ферментації.', tmVariants(['100 г'], { prices: { '100 г': '565.00' } })),
+    tmProduct(3, 'funky-ethiopia-erta', 'Фанкі Ефіопія Ерта', 'Букет цієї фанкі кави.',
+      tmVariants(['250 г'], { available: false })),
+    tmProduct(4, 'dark-grapes-colombia-la-glorieta', 'Темний виноград Ла Глоріета', 'Темний виноград.',
+      tmVariants(['100 г'], { available: (grind) => grind !== 'В зерні' })),
+    tmProduct(5, 'washed-instant-coffee', 'Мита розчинна кава', 'Розчинна кава.',
+      [{ title: '15 чашок / 55 г', option1: '15 чашок / 55 г', option2: null, price: '790.00', available: true }]),
+    tmProduct(6, 'tote-bag', 'Шопер', 'Сумка.', [{ title: 'Default', option1: 'Default', price: '400.00', available: true }],
+      { product_type: 'Мерч' }),
+  ],
+}
+
 function response(body, { status = 200 } = {}) {
   const text = typeof body === 'string' ? body : JSON.stringify(body)
   return { ok: status >= 200 && status < 300, status, text: async () => text }
@@ -333,11 +379,61 @@ test('Penyora: a page without __NEXT_DATA__ is an error', () => {
 // fetchAllNewLots
 // ---------------------------------------------------------------------------
 
+test('Three Mississippi: instant coffee and merch are skipped', () => {
+  const raw = parseThreeMississippiCatalog(THREE_MISSISSIPPI_JSON)
+  assert.deepEqual(raw.map((lot) => lot.externalId), ['1', '2', '3', '4'])
+})
+
+test('Three Mississippi: grinds of one weight become one package', async () => {
+  const lots = await fetchThreeMississippiLots({
+    fetchImpl: fakeFetch({ [THREE_MISSISSIPPI_URL]: response(THREE_MISSISSIPPI_JSON) }),
+  })
+  const kenya = byName(lots, 'Мита Кенія Туркана')
+  assert.equal(kenya.source, 'three-mississippi')
+  assert.equal(kenya.roasterName, 'Three Mississippi')
+  assert.equal(kenya.productUrl, 'https://www.threemississippi.world/uk-ua/products/washed-kenya-turkana')
+  assert.equal(kenya.originCountry, 'Kenya')
+  assert.deepEqual(kenya.processNames, ['washed'])
+  assert.deepEqual(kenya.packageSizes, ['250 г', '400 г'])
+  assert.equal(kenya.price, 650)
+  assert.equal(kenya.currency, 'UAH')
+})
+
+test('Three Mississippi: country from the handle, process from the description', async () => {
+  const lots = await fetchThreeMississippiLots({
+    fetchImpl: fakeFetch({ [THREE_MISSISSIPPI_URL]: response(THREE_MISSISSIPPI_JSON) }),
+  })
+  const banana = byName(lots, 'Банан Ла Глоріета')
+  assert.equal(banana.originCountry, 'Colombia')
+  assert.deepEqual(banana.processNames, ['honey', 'anaerobic'])
+  assert.deepEqual(byName(lots, 'Фанкі Ефіопія Ерта').processNames, [])
+})
+
+test('Three Mississippi: a weight is available when any grind is in stock', async () => {
+  const lots = await fetchThreeMississippiLots({
+    fetchImpl: fakeFetch({ [THREE_MISSISSIPPI_URL]: response(THREE_MISSISSIPPI_JSON) }),
+  })
+  assert.equal(byName(lots, 'Темний виноград Ла Глоріета').isAvailable, true)
+  assert.equal(byName(lots, 'Фанкі Ефіопія Ерта').isAvailable, false)
+})
+
+test('Three Mississippi: an unexpected response is an error', async () => {
+  await assert.rejects(
+    fetchThreeMississippiLots({ fetchImpl: fakeFetch({ [THREE_MISSISSIPPI_URL]: response({ errors: 'Not Found' }) }) }),
+    /Product list is missing/,
+  )
+  await assert.rejects(
+    fetchThreeMississippiLots({ fetchImpl: fakeFetch({ [THREE_MISSISSIPPI_URL]: response({ products: [] }) }) }),
+    /No coffee lots found/,
+  )
+})
+
 test('fetchAllNewLots returns lots from every working source', async () => {
   const routes = {
     [DAM_URL]: response(DAM_HTML),
     [FOUNDATION_LIST_API]: response({ goodscard: FOUNDATION_CARDS }),
     [PENYORA_URL]: response(PENYORA_HTML),
+    [THREE_MISSISSIPPI_URL]: response(THREE_MISSISSIPPI_JSON),
   }
   for (const [chpu, details] of Object.entries(FOUNDATION_DETAILS)) {
     routes[`https://foundation.ua/api/v1/goodscard/${chpu}`] = response(details)
@@ -345,7 +441,7 @@ test('fetchAllNewLots returns lots from every working source', async () => {
 
   const result = await fetchAllNewLots({ fetchImpl: fakeFetch(routes) })
   assert.deepEqual(result.errors, [])
-  assert.deepEqual([...new Set(result.lots.map((lot) => lot.source))], ['dam', 'foundation', 'penyora'])
+  assert.deepEqual([...new Set(result.lots.map((lot) => lot.source))], ['dam', 'foundation', 'penyora', 'three-mississippi'])
   assert.ok(result.lots.every((lot) => lot.currency === 'UAH'))
 })
 
@@ -354,11 +450,12 @@ test('fetchAllNewLots keeps working when one source fails', async () => {
     [DAM_URL]: () => { throw new Error('getaddrinfo ENOTFOUND damcoffee.com.ua') },
     [FOUNDATION_LIST_API]: response({ message: 'Server error' }, { status: 500 }),
     [PENYORA_URL]: response(PENYORA_HTML),
+    [THREE_MISSISSIPPI_URL]: response(THREE_MISSISSIPPI_JSON),
   }
 
   const result = await fetchAllNewLots({ fetchImpl: fakeFetch(routes) })
   assert.ok(result.lots.length > 0)
-  assert.ok(result.lots.every((lot) => lot.source === 'penyora'))
+  assert.deepEqual([...new Set(result.lots.map((lot) => lot.source))], ['penyora', 'three-mississippi'])
   assert.deepEqual(result.errors, [
     { source: 'dam', message: 'getaddrinfo ENOTFOUND damcoffee.com.ua' },
     { source: 'foundation', message: `HTTP 500 for ${FOUNDATION_LIST_API}` },
@@ -384,5 +481,5 @@ test('fetchAllNewLots reports synchronous adapter crashes and timeouts', async (
 test('fetchAllNewLots returns only errors when every source fails', async () => {
   const result = await fetchAllNewLots({ fetchImpl: fakeFetch({}) })
   assert.deepEqual(result.lots, [])
-  assert.deepEqual(result.errors.map((error) => error.source), ['dam', 'foundation', 'penyora'])
+  assert.deepEqual(result.errors.map((error) => error.source), ['dam', 'foundation', 'penyora', 'three-mississippi'])
 })
