@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { requireUser } from '../../lib/auth.js'
 import { coffeeScore } from '../../lib/stats.js'
-import { getUsageSnapshot } from '../../lib/entitlements.js'
+import { getRequestUsage } from '../../lib/request-usage.js'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
         },
       },
     }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
   ])
 
   const groups = new Map()

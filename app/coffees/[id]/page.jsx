@@ -7,7 +7,7 @@ import { deleteCoffee, toggleCoffeeFinished, toggleWouldBuyAgain } from '../../.
 import { ConfirmSubmitButton } from '../../components/ConfirmSubmitButton.jsx'
 import { requireUser } from '../../../lib/auth.js'
 import { findOwnedCoffee } from '../../../lib/owned-coffees.js'
-import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { getRequestUsage } from '../../../lib/request-usage.js'
 import { COFFEE_PROCESSES_INCLUDE, coffeeProcessLabel } from '../../../lib/coffee-processes.js'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +29,7 @@ export default async function CoffeeDetailPage({ params }) {
         brewLogs: { where: { userId: user.id }, orderBy: { brewedAt: 'desc' } },
       },
     }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
   ])
   if (!coffee) notFound()
 

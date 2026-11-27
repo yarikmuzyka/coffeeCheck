@@ -3,7 +3,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { createCoffee } from '../../../lib/actions.js'
 import { CoffeeForm } from '../CoffeeForm.jsx'
 import { requireUser } from '../../../lib/auth.js'
-import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { getRequestUsage } from '../../../lib/request-usage.js'
 import { LimitReached } from '../../components/UsagePanel.jsx'
 import { matchLotProcesses } from '../../../lib/coffee-processes.js'
 
@@ -16,7 +16,7 @@ export default async function NewCoffeePage({ searchParams }) {
   const [roasters, processes, usage, wishedLot] = await Promise.all([
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
     sourceLotId
       ? prisma.wishedLot.findUnique({
         where: { userId_lotId: { userId: user.id, lotId: sourceLotId } },

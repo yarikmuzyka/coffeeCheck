@@ -128,7 +128,6 @@ export default async function NewLotsPage({ searchParams }) {
   const [recentLots, wishedItems, latestSync, coffees] = await Promise.all([
     prisma.externalLot.findMany({
       where: { isAvailable: true, firstSeenAt: { gte: newLotCutoff() } },
-      include: { wishedBy: { where: { userId: user.id }, select: { createdAt: true } } },
       orderBy: { firstSeenAt: 'desc' },
     }),
     prisma.wishedLot.findMany({
@@ -143,10 +142,9 @@ export default async function NewLotsPage({ searchParams }) {
     }),
   ])
 
-  const recommendations = recommendLots(
-    [...recentLots, ...wishedItems.map((item) => item.lot)],
-    coffees,
-  )
+  const recentIds = new Set(recentLots.map((lot) => lot.id))
+  const extraWishedLots = tab === 'wish' ? wishedItems.map(({ lot }) => lot).filter((lot) => !recentIds.has(lot.id)) : []
+  const recommendations = recommendLots([...recentLots, ...extraWishedLots], coffees)
   const matchedLots = sortByRecommendation(
     recentLots.filter((lot) => recommendations.get(lot.id)?.recommended),
     recommendations,
