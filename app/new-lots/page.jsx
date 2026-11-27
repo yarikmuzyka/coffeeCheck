@@ -115,9 +115,8 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
   )
 }
 
-export default async function NewLotsPage({ searchParams }) {
+async function getFeed(params, includeSync = false) {
   const user = await requireUser()
-  const params = await searchParams
   const tab = ['wish', 'match'].includes(params?.tab) ? params.tab : 'new'
   const filters = {
     roaster: params?.roaster ?? '',
@@ -128,14 +127,14 @@ export default async function NewLotsPage({ searchParams }) {
   const [recentLots, wishedItems, latestSync, coffees] = await Promise.all([
     prisma.externalLot.findMany({
       where: { isAvailable: true, firstSeenAt: { gte: newLotCutoff() } },
-      orderBy: { firstSeenAt: 'desc' },
+      orderBy: [{ firstSeenAt: 'desc' }, { id: 'asc' }],
     }),
     prisma.wishedLot.findMany({
       where: { userId: user.id },
       include: { lot: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { lotId: 'asc' }],
     }),
-    prisma.externalLot.aggregate({ _max: { lastSeenAt: true } }),
+    includeSync ? prisma.externalLot.aggregate({ _max: { lastSeenAt: true } }) : null,
     prisma.coffee.findMany({
       where: { userId: user.id },
       include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE },
@@ -153,6 +152,30 @@ export default async function NewLotsPage({ searchParams }) {
   const lots = tab === 'new'
     ? filterAndSortLots(allFilterLots, filters)
     : allFilterLots.filter((lot) => matchesFeedFilters(lot, filters))
+  return { tab, filters, lots, allFilterLots, recentLots, matchedLots, wishedItems, latestSync, recommendations }
+}
+
+function renderLot(lot, wishedByLot, recommendations) {
+  return <LotCard key={lot.id} lot={lot} isWished={wishedByLot.has(lot.id)}
+    wishCreatedAt={wishedByLot.get(lot.id)} recommendation={recommendations.get(lot.id)} />
+}
+
+async function loadBatch(filters, offset) {
+  'use server'
+  if (!Number.isSafeInteger(offset) || offset < LOTS_PER_BATCH || offset % LOTS_PER_BATCH !== 0) throw new Error('Невірна порція')
+  const { lots, wishedItems, recommendations } = await getFeed(filters)
+  const wishedByLot = new Map(wishedItems.map(({ lotId, createdAt }) => [lotId, createdAt]))
+  return {
+    entries: lots.slice(offset, offset + LOTS_PER_BATCH).map((lot) => ({
+      id: lot.id, card: renderLot(lot, wishedByLot, recommendations),
+    })),
+    hasMore: offset + LOTS_PER_BATCH < lots.length,
+  }
+}
+
+export default async function NewLotsPage({ searchParams }) {
+  const params = await searchParams
+  const { tab, filters, lots, allFilterLots, recentLots, matchedLots, wishedItems, latestSync, recommendations } = await getFeed(params, true)
   const requestedPage = Number(params?.page)
   const maxPage = Math.max(1, Math.ceil(lots.length / LOTS_PER_BATCH))
   const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, maxPage) : 1
@@ -239,24 +262,14 @@ export default async function NewLotsPage({ searchParams }) {
       {hobaLots.length > 0 && <HobaPicker lots={hobaLots} />}
 
       {lots.length > 0 ? (
-        <>
-        <div className="new-lots-list">
-          {visibleLots.map((lot) => (
-            <LotCard
-              key={lot.id}
-              lot={lot}
-              isWished={wishedByLot.has(lot.id)}
-              wishCreatedAt={wishedByLot.get(lot.id)}
-              recommendation={recommendations.get(lot.id)}
-            />
-          ))}
-        </div>
-        {page < maxPage && (
-          <div style={{ justifySelf: 'center' }}>
-            <LoadMoreLots href={filterHref(tab, { ...filters, page: page + 1 })} />
-          </div>
-        )}
-        </>
+        <LoadMoreLots
+          key={JSON.stringify([tab, filters, page, visibleLots.map(({ id }) => id), wishedItems.map(({ lotId }) => lotId)])}
+          initialEntries={visibleLots.map((lot) => ({ id: lot.id, card: renderLot(lot, wishedByLot, recommendations) }))}
+          initialOffset={page * LOTS_PER_BATCH}
+          hasMore={page < maxPage}
+          batchSize={LOTS_PER_BATCH}
+          loadBatch={loadBatch.bind(null, { tab, ...filters })}
+        />
       ) : (
         <div className="card new-lots-empty">
           <h2>{tab === 'wish' ? 'Список поки порожній' : tab === 'match' ? 'Поки нічого під твій смак' : 'Новинок за цими фільтрами немає'}</h2>
