@@ -1,92 +1,38 @@
-/* ============================================================
-   coffee logger — тема «Ceramic Calm» (ітерація Clear)
-   Тепла палітра з наголосом на читабельність: рівний фон, білі картки,
-   Literata для заголовків, Inter для тексту, мінімум 13 px. День і ніч.
-   ============================================================ */
-
 :root {
-  --bg: #f3eee6;              /* молоко / овес */
-  --bg-2: #ebe3d6;
-  --ink: #2a1e17;             /* еспресо */
-  --muted: #54473b;
-  --card: #ffffff;
-  --border: #d8ccb9;
-  --border-strong: #bfae95;
-
-  --accent: #9a4a2f;          /* тепла глина — основні дії, активні стани */
-  --accent-strong: #823d26;
-  --accent-soft: #f4e5dc;
-  --on-accent: #fff8f2;
-  --sage: #46573c;            /* приглушена шавлія — другорядні стани */
-  --sage-soft: #e7eadd;
-  --terra: #8a4630;
-  --terra-soft: #f6ebe4;
-
-  /* приглушена керамічна палітра категорій */
-  --c1: #56654a;  /* шавлія */
-  --c2: #9a7347;  /* глина світла */
-  --c3: #a2553a;  /* глина */
-  --c4: #6b4e3a;  /* еспресо */
-  --c5: #5d7186;  /* сланець */
-
-  --good: #56654a;
-  --bad: #a0453a;
-  --star: #9a7347;
-
-  --field: #ffffff;
-  --on-danger: #ffffff;
-  --overlay-soft: rgba(20, 9, 2, 0.12);
-  --backdrop: rgba(42, 32, 25, 0.45);
-  --shadow: 0 1px 2px rgba(60, 40, 20, 0.05), 0 8px 24px -18px rgba(60, 40, 20, 0.25);
-  --shadow-pop: 0 18px 40px -20px rgba(60, 40, 20, 0.35);
-  --radius-lg: 18px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-
-  --font-serif: var(--font-literata), "Iowan Old Style", Georgia, serif;
-  --font-sans: var(--font-inter), "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme: light;
+  --bg:#fffefd; --bg-2:#f1f4f8; --ink:#232831; --muted:#565f6f;
+  --card:#fff; --border:#e4e9f0; --border-strong:#aeb9ca;
+  --accent:#33529a; --accent-strong:#273f78; --accent-soft:#eaf0ff; --on-accent:#fff;
+  --sage:#245c4a; --sage-soft:#e1ece4; --terra:#87452c; --terra-soft:#f9e7d9;
+  --c1:#508374; --c2:#5471ac; --c3:#a96543; --c4:#586783; --c5:#6d5794;
+  --good:#245c4a; --bad:#9b362f; --star:#8a6230; --field:#fff; --on-danger:#fff;
+  --overlay-soft:rgba(34,48,70,.12); --backdrop:rgba(34,48,70,.45);
+  --shadow:0 4px 16px rgba(34,48,70,.05); --shadow-pop:0 14px 32px rgba(34,48,70,.14);
+  --radius-lg:16px; --radius-md:12px; --radius-sm:8px;
+  --font-sans:system-ui,sans-serif; --font-serif:var(--font-sans);
 }
 
-/* Нічна версія Ceramic Calm: тепле еспресо, вершковий текст, світліша шавлія.
-   Вмикається за системною темою; макет і типографіка ті самі. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1b1613;
-    --bg-2: #2a231e;
-    --ink: #f1e9de;
-    --muted: #cbbda9;
-    --card: #262019;
-    --border: #4a3f36;
-    --border-strong: #5f5146;
-
-    --accent: #e0a083;
-    --accent-strong: #ecb79d;
-    --accent-soft: #3b2a22;
-    --on-accent: #1b1613;
-    --sage: #a9bc98;
-    --sage-soft: #2c3527;
-    --terra: #e9a98b;
-    --terra-soft: #3a2620;
-
-    --c1: #a9bc98;
-    --c2: #d2a979;
-    --c3: #e0a083;
-    --c4: #c4a58c;
-    --c5: #9fb3c8;
-
-    --good: #a9bc98;
-    --bad: #e4907f;
-    --star: #d2a979;
-
-    --field: #201a16;
-    --on-danger: #1b1613;
-    --overlay-soft: rgba(20, 9, 2, 0.16);
-    --backdrop: rgba(8, 5, 3, 0.65);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
-    --shadow-pop: 0 20px 44px -18px rgba(0, 0, 0, 0.75);
-    color-scheme: dark;
-  }
+.coffee-diary { max-width:820px; margin-inline:auto; }
+.diary-month { margin-top:24px; }
+.diary-month h2 { color:var(--muted); font-size:.9rem; text-transform:capitalize; }
+.diary-month ul { list-style:none; padding:0; margin:10px 0; display:grid; gap:10px; }
+.process-coffee-list { display:grid; gap:8px; }
+.diary-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; color:var(--ink); }
+.diary-row h3,.diary-row p { margin:0; overflow-wrap:anywhere; }
+.diary-row:hover { text-decoration:none; border-color:var(--border-strong); }
+.diary-mark { display:grid; place-items:center; width:48px; height:48px; border-radius:12px; background:var(--sage-soft); }
+.diary-month li:nth-child(3n + 2) .diary-mark { background:var(--terra-soft); }
+.diary-month li:nth-child(3n) .diary-mark { background:var(--accent-soft); }
+.diary-rating { padding:5px 9px; background:var(--accent-soft); color:var(--accent-strong); border-radius:8px; white-space:nowrap; }
+.diary-unrated,.diary-note { color:var(--muted); font-size:.875rem; }
+.new-lots-list .new-lot-media { background:var(--sage-soft); border-radius:var(--radius-md); }
+.new-lots-list > :nth-child(3n + 2) .new-lot-media { background:var(--terra-soft); }
+.new-lots-list > :nth-child(3n) .new-lot-media { background:var(--accent-soft); }
+.new-lots-list .new-lot-image { object-fit:contain; background:transparent; padding:10px; }
+@media (max-width:480px) {
+  .diary-row.card { gap:8px; padding:10px; }
+  .diary-mark { width:34px; height:34px; font-size:.8rem; }
+  .diary-rating,.diary-unrated { font-size:.75rem; }
 }
 
 * { box-sizing: border-box; }
@@ -154,6 +100,22 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .brand-logo-mark { width: 30px; height: 30px; flex: none; color: var(--accent); --logo-check: var(--terra); }
 .brand:hover { text-decoration: none; }
 .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.desktop-account { display: contents; }
+.nav.mobile-nav { display: none; }
+@media (max-width: 640px) {
+  .topbar:has(.mobile-nav) { row-gap: 6px; padding-bottom: 6px; }
+  .topbar .desktop-nav, .topbar .desktop-account { display: none; }
+  .topbar .mobile-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; flex-basis: 100%; position: relative; }
+  .mobile-nav > a, .mobile-nav-more > summary { display: grid; place-content: center; min-height: 44px; padding: 4px; text-align: center; font-size: .8125rem; white-space: nowrap; }
+  .mobile-nav-more > summary { display: flex; align-items: center; justify-content: center; gap: 4px; list-style: none; cursor: pointer; color: var(--muted); }
+  .mobile-nav-more > summary::-webkit-details-marker { display: none; }
+  .mobile-nav-more > .mobile-nav-current { color: var(--accent); text-decoration: underline; text-underline-offset: 7px; }
+  .mobile-nav-panel { position: absolute; inset: 100% 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-pop); padding: 8px; max-height: 65dvh; overflow: auto; }
+  .mobile-nav-panel > a { display: flex; align-items: center; min-height: 44px; }
+  .mobile-nav-account { display: grid; gap: 8px; border-top: 1px solid var(--border); padding: 8px 4px 0; }
+  .mobile-nav-account .header-usage-popover { position: static; width: auto; }
+  .mobile-nav-account .account-menu { flex-wrap: wrap; }
+}
 .nav a {
   color: var(--muted);
   font-size: 0.9375rem;
@@ -205,6 +167,9 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .new-lots-tabs a { position: relative; padding: 10px 0 12px; color: var(--muted); font-weight: 500; }
 .new-lots-tabs a:hover { color: var(--ink); text-decoration: none; }
 .new-lots-tabs a span { margin-left: 4px; color: var(--muted); font-size: 0.8125rem; font-weight: 400; }
+.new-lots-tabs a :is(.feed-wish-full, .feed-wish-short) { margin: 0; font: inherit; color: inherit; }
+.feed-wish-short, .feed-controls__buttons { display: none; }
+.feed-controls, .feed-controls__panel { display: contents; }
 .new-lots-tabs .new-lots-tabs__active { color: var(--ink); }
 .new-lots-tabs .new-lots-tabs__active::after { content: ''; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--accent); }
 .new-lots-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: -4px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.8125rem; }
@@ -242,7 +207,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .new-lot-marker > span { font-size: 0.95rem; }
 .new-lot-why { margin: 8px 0 0; color: var(--sage); font-size: 0.875rem; font-weight: 600; }
 .new-lot-tried { margin: 8px 0 0; font-size: 0.875rem; }
-.new-lot-tried a { color: var(--accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+.new-lot-tried a { display: inline-block; text-underline-offset: 3px; }
 .new-lot-notes { margin: 7px 0 0; font-size: 0.9375rem; }
 .new-lot-seen { margin: 8px 0 0; color: var(--muted); font-size: 0.875rem; }
 .new-lot-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 4px 0; border-top: 1px solid var(--border); }
@@ -250,6 +215,33 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .new-lot-card__buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
 .new-lot-card__buttons form { display: contents; }
 .new-lot-card__buttons .btn { padding: 8px 14px; font-size: 0.875rem; }
+.new-lots-list .new-lot-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 8px;
+}
+.new-lots-list .new-lot-card__buttons { display: contents; }
+.new-lots-list .new-lot-card__buttons .btn {
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: 8px;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+}
+.new-lots-list .new-lot-card__buttons > a:first-child { justify-self: end; }
+.new-lot-card__buttons .lot-wish-toggle { background: var(--accent-soft); color: var(--accent-strong); }
+.lot-wish-toggle > span { grid-area: 1 / 1; }
+.lot-wish-toggle__saved { visibility: hidden; }
+.new-lot-card__buttons .lot-wish-toggle { display: inline-grid; place-items: center; }
+@media (hover: hover) and (pointer: fine) {
+  .lot-wish-toggle:not(:hover):not(:focus-visible) .lot-wish-toggle__saved { visibility: visible; }
+  .lot-wish-toggle:not(:hover):not(:focus-visible) .lot-wish-toggle__remove { visibility: hidden; }
+}
+.new-lot-card__buttons .lot-wish-toggle:is(:hover, :focus-visible) { background: #fbe9e7; color: var(--bad); }
+.new-lots-list .new-lot-card__buttons > form:only-of-type > button:not(.btn--ghost) {
+  grid-column: 1 / -1;
+}
 .new-lots-empty { grid-column: 1 / -1; padding: 42px 22px; text-align: center; }
 .new-lots-empty h2 { margin: 0 0 6px; }
 .new-lots-empty p { margin: 0 0 16px; color: var(--muted); }
@@ -262,6 +254,17 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 
 @media (max-width: 560px) {
+  .new-lots-page { gap: 12px; }
+  .new-lots-head .home-kicker, .new-lots-updated small { display: none; }
+  .new-lots-tabs a { white-space: nowrap; }
+  .new-lots-tabs a .feed-wish-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .feed-wish-short { display: inline; }
+  .feed-controls { display: grid; gap: 10px; }
+  .feed-controls__buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+  .feed-controls__buttons .btn { min-height: 44px; }
+  .feed-controls__panel { display: block; }
+  .feed-controls__panel[data-expanded="false"] { display: none; }
+  .feed-controls__panel .new-lots-legend { margin: 0; }
   .new-lots-head { align-items: flex-start; flex-direction: column; gap: 6px; }
   .new-lots-updated { text-align: left; }
   .new-lots-tabs { gap: 0; }
@@ -650,10 +653,18 @@ fieldset { border: 1px solid var(--border); border-radius: var(--radius-md); pad
 @media (max-width: 760px) {
   .coffee-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.coffee-sort-mobile { display: none; }
 @media (max-width: 520px) {
   .coffee-filter-grid { grid-template-columns: 1fr; }
-  .coffee-sort strong { width: 100%; }
-  .coffee-sort-option { flex: 1 1 auto; justify-content: center; }
+  .coffee-sort { display: none; }
+  .coffee-controls { gap: 6px; position: relative; }
+  .coffee-controls > details > summary { min-height: 44px; padding-inline: 9px; font-size: .8125rem; }
+  .coffee-sort-mobile { display: block; }
+  .coffee-sort-mobile summary { list-style: none; }
+  .coffee-sort-mobile summary::-webkit-details-marker { display: none; }
+  .coffee-sort-mobile-options { position: absolute; top: 100%; right: 0; z-index: 5; min-width: 152px; padding: 5px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-pop); }
+  .coffee-sort-mobile-options a { display: flex; align-items: center; min-height: 44px; padding: 6px 10px; color: var(--ink); border-radius: var(--radius-sm); }
+  .coffee-sort-mobile-options a[aria-current] { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
 }
 
 /* ---------------- coffee / roaster rows ---------------- */

@@ -6,6 +6,10 @@ import { removeWishedLot, saveWishedLot } from '../../lib/new-lot-actions.js'
 import { COFFEE_PROCESSES_INCLUDE } from '../../lib/coffee-processes.js'
 import { recommendLots, sortByRecommendation } from '../../lib/lot-recommendations.js'
 import HobaPicker from './HobaPicker.jsx'
+import FeedControls from './FeedControls.jsx'
+import LoadMoreLots from './LoadMoreLots.jsx'
+
+const LOTS_PER_BATCH = 12
 
 export const dynamic = 'force-dynamic'
 
@@ -79,11 +83,6 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
         {recommended && recommendation.reasonText && (
           <p className="new-lot-why">Під твій смак: {recommendation.reasonText}</p>
         )}
-        {recommendation?.tried && (
-          <p className="new-lot-tried">
-            <Link href={`/coffees/${recommendation.triedCoffeeId}`}>{marker.label}</Link>
-          </p>
-        )}
         <p className="new-lot-seen">
           {wishCreatedAt ? `У списку з ${formatDate(wishCreatedAt)}` : `Знайдено ${formatDate(lot.firstSeenAt)}`}
           {lot.packageSizes.length > 0 ? ` · ${lot.packageSizes.join(' / ')}` : ''}
@@ -98,7 +97,10 @@ function LotCard({ lot, isWished, wishCreatedAt, recommendation }) {
               <Link className="btn btn--primary" href={buildNewCoffeeHref(lot.id)}>Купив — у колекцію</Link>
               <form action={removeWishedLot}>
                 <input type="hidden" name="lotId" value={lot.id} />
-                <button className="btn btn--ghost" type="submit">Прибрати зі списку</button>
+                <button className="btn btn--ghost lot-wish-toggle" type="submit" aria-label="Прибрати зі списку">
+                  <span className="lot-wish-toggle__saved" aria-hidden="true">У списку</span>
+                  <span className="lot-wish-toggle__remove" aria-hidden="true">Прибрати зі списку</span>
+                </button>
               </form>
             </>
           ) : (
@@ -153,6 +155,10 @@ export default async function NewLotsPage({ searchParams }) {
   const lots = tab === 'new'
     ? filterAndSortLots(allFilterLots, filters)
     : allFilterLots.filter((lot) => matchesFeedFilters(lot, filters))
+  const requestedPage = Number(params?.page)
+  const maxPage = Math.max(1, Math.ceil(lots.length / LOTS_PER_BATCH))
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, maxPage) : 1
+  const visibleLots = lots.slice(0, page * LOTS_PER_BATCH)
   const roasters = uniqueSorted(allFilterLots.map((lot) => lot.roasterName))
   const countries = uniqueSorted(allFilterLots.map((lot) => lot.originCountry))
   const processes = uniqueSorted(allFilterLots.flatMap((lot) => lot.processNames))
@@ -193,16 +199,17 @@ export default async function NewLotsPage({ searchParams }) {
           Для мене <span>{matchedLots.length}</span>
         </Link>
         <Link href={filterHref('wish')} className={tab === 'wish' ? 'new-lots-tabs__active' : undefined}>
-          Хочу спробувати <span>{wishedItems.length}</span>
+          <span className="feed-wish-full">Хочу спробувати</span><span className="feed-wish-short" aria-hidden="true">Збережені</span> <span>{wishedItems.length}</span>
         </Link>
       </nav>
 
+      <FeedControls filterCount={Object.values(filters).filter(Boolean).length} legend={
       <ul className="new-lots-legend" aria-label="Що означають емодзі на пачках">
         {LEGEND.map(([emoji, label]) => (
           <li key={emoji}><span aria-hidden="true">{emoji}</span> {label}</li>
         ))}
       </ul>
-
+      } filters={
       <form className="new-lots-filters card" action="/new-lots">
         {tab !== 'new' && <input type="hidden" name="tab" value={tab} />}
         <label className="field">
@@ -229,12 +236,14 @@ export default async function NewLotsPage({ searchParams }) {
         <button className="btn btn--primary" type="submit">Застосувати</button>
         <Link className="btn btn--ghost" href={filterHref(tab)}>Скинути</Link>
       </form>
+      } />
 
       {hobaLots.length > 0 && <HobaPicker lots={hobaLots} />}
 
       {lots.length > 0 ? (
+        <>
         <div className="new-lots-list">
-          {lots.map((lot) => (
+          {visibleLots.map((lot) => (
             <LotCard
               key={lot.id}
               lot={lot}
@@ -244,6 +253,12 @@ export default async function NewLotsPage({ searchParams }) {
             />
           ))}
         </div>
+        {page < maxPage && (
+          <div style={{ justifySelf: 'center' }}>
+            <LoadMoreLots href={filterHref(tab, { ...filters, page: page + 1 })} />
+          </div>
+        )}
+        </>
       ) : (
         <div className="card new-lots-empty">
           <h2>{tab === 'wish' ? 'Список поки порожній' : tab === 'match' ? 'Поки нічого під твій смак' : 'Новинок за цими фільтрами немає'}</h2>

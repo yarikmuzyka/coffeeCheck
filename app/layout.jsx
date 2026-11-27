@@ -1,6 +1,5 @@
 import './globals.css'
 import Link from 'next/link'
-import { Literata, Inter } from 'next/font/google'
 import { getCurrentUser } from '../lib/auth.js'
 import { SignOutButton } from './components/SignOutButton.jsx'
 import { HeaderUsage } from './components/HeaderUsage.jsx'
@@ -8,23 +7,6 @@ import { getUsageSnapshot } from '../lib/entitlements.js'
 import { prisma } from '../lib/prisma.js'
 import { LogoMark } from './components/LogoMark.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
-
-// Ceramic Calm: Literata (низький контраст штрихів, кирилиця) для заголовків,
-// Inter для тексту. Next.js самохостить шрифти.
-// Обидва шрифти variable: на запит окремих ваг Google Fonts інколи віддає
-// інстансовані файли `/l/font?kit=…` без розширення, і next/font падає на білді.
-const literata = Literata({
-  subsets: ['latin', 'latin-ext', 'cyrillic'],
-  weight: 'variable',
-  display: 'swap',
-  variable: '--font-literata',
-})
-const inter = Inter({
-  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
-  weight: 'variable',
-  display: 'swap',
-  variable: '--font-inter',
-})
 
 export const metadata = {
   title: 'coffee logger — Brew Journal',
@@ -45,10 +27,7 @@ export const metadata = {
 }
 
 export const viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f3eee6' },
-    { media: '(prefers-color-scheme: dark)', color: '#1b1613' },
-  ],
+  themeColor: '#fffefd',
   // cover — щоб standalone-режим на iPhone малювався під статус-баром,
   // а відступи контролювались через env(safe-area-inset-*)
   viewportFit: 'cover',
@@ -68,9 +47,19 @@ const NAV = [
 export default async function RootLayout({ children }) {
   const user = await getCurrentUser()
   const usage = user ? await getUsageSnapshot(prisma, user.id) : null
+  const account = user && (
+    <>
+      <HeaderUsage usage={usage} />
+      <div className="account-menu">
+        {user.image && <img src={user.image} alt="" className="avatar" referrerPolicy="no-referrer" />}
+        <span className="account-name">{user.name ?? user.email}</span>
+        <SignOutButton />
+      </div>
+    </>
+  )
 
   return (
-    <html lang="uk" className={`${literata.variable} ${inter.variable}`}>
+    <html lang="uk">
       <body>
         <header className="topbar">
           <Link href={user ? '/dashboard' : '/login'} className="brand">
@@ -80,12 +69,8 @@ export default async function RootLayout({ children }) {
           {user && (
             <>
               <NavLinks items={NAV} />
-              <HeaderUsage usage={usage} />
-              <div className="account-menu">
-                {user.image && <img src={user.image} alt="" className="avatar" referrerPolicy="no-referrer" />}
-                <span className="account-name">{user.name ?? user.email}</span>
-                <SignOutButton />
-              </div>
+              <div className="desktop-account">{account}</div>
+              <NavLinks items={NAV} mobile>{account}</NavLinks>
             </>
           )}
         </header>
