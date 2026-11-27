@@ -3,7 +3,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { createBrewLog } from '../../../lib/actions.js'
 import { BREW_METHODS, SCORE_FIELDS } from '../../../lib/constants.js'
 import { requireUser } from '../../../lib/auth.js'
-import { getUsageSnapshot } from '../../../lib/entitlements.js'
+import { getRequestUsage } from '../../../lib/request-usage.js'
 import { LimitReached } from '../../components/UsagePanel.jsx'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,7 @@ export default async function NewBrewLogPage({ searchParams }) {
       orderBy: { createdAt: 'desc' },
       include: { roaster: true },
     }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
   ])
 
   if (usage.resources.brewLogs.reached) {

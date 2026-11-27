@@ -3,8 +3,7 @@ import Link from 'next/link'
 import { getCurrentUser } from '../lib/auth.js'
 import { SignOutButton } from './components/SignOutButton.jsx'
 import { HeaderUsage } from './components/HeaderUsage.jsx'
-import { getUsageSnapshot } from '../lib/entitlements.js'
-import { prisma } from '../lib/prisma.js'
+import { getRequestUsage } from '../lib/request-usage.js'
 import { LogoMark } from './components/LogoMark.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 
@@ -46,7 +45,7 @@ const NAV = [
 
 export default async function RootLayout({ children }) {
   const user = await getCurrentUser()
-  const usage = user ? await getUsageSnapshot(prisma, user.id) : null
+  const usage = user ? await getRequestUsage(user.id) : null
   const account = user && (
     <>
       <HeaderUsage usage={usage} />

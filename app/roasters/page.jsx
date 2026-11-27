@@ -3,7 +3,7 @@ import { prisma } from '../../lib/prisma.js'
 import { deleteRoaster, deleteProcess } from '../../lib/actions.js'
 import { ConfirmSubmitButton } from '../components/ConfirmSubmitButton.jsx'
 import { requireUser } from '../../lib/auth.js'
-import { getUsageSnapshot } from '../../lib/entitlements.js'
+import { getRequestUsage } from '../../lib/request-usage.js'
 import { pluralizeUk } from '../../lib/format.js'
 import { normalizeCatalogSort, sortCatalog } from '../../lib/catalog-sort.js'
 
@@ -61,7 +61,7 @@ export default async function RoastersPage({ searchParams }) {
       where: { userId: user.id },
       include: { _count: { select: { coffees: true } } },
     }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
   ])
   const roasters = sortCatalog(roasterRows, sorts.roasters)
   const processes = sortCatalog(processRows, sorts.processes)

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { prisma } from '../../lib/prisma.js'
 import { coffeeScore } from '../../lib/stats.js'
 import { requireUser } from '../../lib/auth.js'
-import { getUsageSnapshot } from '../../lib/entitlements.js'
+import { getRequestUsage } from '../../lib/request-usage.js'
 import { sortCoffeeEntries } from '../../lib/coffee-sort.js'
 import { COFFEE_PROCESSES_INCLUDE, coffeeHasProcess, coffeeProcessLabel } from '../../lib/coffee-processes.js'
 
@@ -41,7 +41,7 @@ export default async function CoffeesPage({ searchParams }) {
     prisma.coffee.findMany({ where: { userId: user.id }, include: { roaster: true, ...COFFEE_PROCESSES_INCLUDE } }),
     prisma.roaster.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
     prisma.process.findMany({ where: { userId: user.id }, orderBy: { name: 'asc' } }),
-    getUsageSnapshot(prisma, user.id),
+    getRequestUsage(user.id),
   ])
 
   const countries = [...new Set(allCoffees.map((c) => c.originCountry).filter(Boolean))].sort()
