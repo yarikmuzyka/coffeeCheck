@@ -165,6 +165,20 @@ export default async function CoffeesPage({ searchParams }) {
             </div>
           </form>
         </details>
+        <details className="coffee-sort-mobile" key={sort}>
+          <summary className="btn btn--secondary btn--sm">
+            <span className="sr-only">Сортувати: </span>
+            {sortOptions.find(([value]) => value === sort)?.[1] ?? 'Дата'}
+            <span aria-hidden="true">⌄</span>
+          </summary>
+          <nav className="coffee-sort-mobile-options" aria-label="Сортування кав">
+            {sortOptions.map(([value, label]) => (
+              <Link key={value} href={coffeeHref({ sort: value })} aria-current={sort === value ? 'page' : undefined}>
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </details>
       </div>
 
       <nav className="coffee-sort" aria-label="Сортування кав">
@@ -205,9 +219,9 @@ export default async function CoffeesPage({ searchParams }) {
                     {c.scaScore}<br /><small>SCA</small>
                   </div>
                 )}
-                <div className="score-pill">
-                  {score != null ? score.toFixed(1) : '—'}<br /><small>/5</small>
-                </div>
+                <span className={score == null ? 'diary-unrated' : 'diary-rating'}>
+                  {score == null ? 'Без оцінки' : `${score.toFixed(1).replace('.', ',')} / 5`}
+                </span>
               </div>
             </Link>
           ))}

@@ -146,7 +146,6 @@ function OriginDetail({ origin }) {
 
 function ProcessDetail({ process, mode }) {
   const topCountry = process.countries.find((country) => country.avg != null)
-  const topCoffee = process.topCoffee
   const isCombination = mode === 'combination'
 
   return (
@@ -188,23 +187,22 @@ function ProcessDetail({ process, mode }) {
       )}
 
       <p className="origin-detail__label">
-        {isCombination ? 'Твоя найкраща кава з цим поєднанням' : 'Твоя найкраща кава з цією обробкою'}
+        {isCombination ? 'Кави з цим поєднанням' : 'Кави з цією обробкою'}
       </p>
-      {topCoffee ? (
-        <Link href={`/coffees/${topCoffee.id}`} className="origin-winner">
-          <span className="origin-winner__mark">TOP</span>
-          <span>
-            <strong>{topCoffee.name}</strong>
-            <small>
-              {[topCoffee.roaster?.name, topCoffee.originCountry, isCombination ? null : coffeeProcessLabel(topCoffee)]
-                .filter(Boolean).join(' · ')}
-            </small>
-          </span>
-          <b>{formatScore(coffeeScore(topCoffee))}</b>
-        </Link>
-      ) : (
-        <div className="origin-detail__empty">Додай оцінку, щоб побачити фаворита.</div>
-      )}
+      <div className="process-coffee-list">
+        {process.coffees.map((coffee) => (
+          <Link className="card diary-row" href={`/coffees/${coffee.id}`} key={coffee.id}>
+            <span className="diary-mark" aria-hidden="true">{coffee === process.topCoffee ? 'TOP' : coffee.name.trim().slice(0, 1).toUpperCase()}</span>
+            <div>
+              <h3>{coffee.name}</h3>
+              <p className="meta">{[coffee.roaster?.name, coffee.originCountry, isCombination ? null : coffeeProcessLabel(coffee)].filter(Boolean).join(' · ')}</p>
+            </div>
+            <span className={coffeeScore(coffee) == null ? 'diary-unrated' : 'diary-rating'}>
+              {coffeeScore(coffee) == null ? 'Без оцінки' : `${formatScore(coffeeScore(coffee))} / 5`}
+            </span>
+          </Link>
+        ))}
+      </div>
 
       {topCountry && (
         <p className="origin-insight">

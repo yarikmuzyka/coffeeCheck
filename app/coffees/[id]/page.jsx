@@ -72,9 +72,9 @@ export default async function CoffeeDetailPage({ params }) {
               </ConfirmSubmitButton>
             </form>
           </div>
-          <div className="score-pill score-pill--detail">
-            {score != null ? score.toFixed(1) : '—'}<br /><small>моя оцінка /5</small>
-          </div>
+          <span className={score == null ? 'diary-unrated' : 'diary-rating'} aria-label={score == null ? 'Без оцінки' : `Моя оцінка: ${score.toFixed(1).replace('.', ',')} з 5`}>
+            {score == null ? 'Без оцінки' : `${score.toFixed(1).replace('.', ',')} / 5`}
+          </span>
         </div>
       </header>
 

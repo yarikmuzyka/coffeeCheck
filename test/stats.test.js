@@ -79,3 +79,16 @@ test('process insights rank exact processing methods and their best countries', 
   assert.equal(processes[1].countries[0].key, 'Colombia')
   assert.equal(processes[1].avg, 4.25)
 })
+
+test('a selected processing combination exposes every counted coffee, including unrated entries', () => {
+  const coffees = [
+    { id: 'unrated', process: 'natural thermal shock' },
+    { id: 'rated', process: 'natural thermal shock', myScore: 4.5 },
+    { id: 'other', process: 'natural', myScore: 5 },
+  ]
+  const group = computeProcessInsights(coffees, { mode: 'combination' })
+    .find(({ key }) => key === 'natural thermal shock')
+  assert.equal(group.count, 2)
+  assert.equal(group.avg, 4.5)
+  assert.deepEqual(group.coffees.map(({ id }) => id), ['rated', 'unrated'])
+})
